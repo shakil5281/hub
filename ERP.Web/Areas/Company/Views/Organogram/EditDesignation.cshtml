@@ -1,0 +1,25 @@
+@model DesignationVm
+@{
+    ViewData["Title"] = "Edit Designation";
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Edit Designation",
+    Subtitle = Model.Title,
+    Actions = [("Back to Organogram", Url.Action("Index", new { tab = "designations" })!, "secondary")]
+})
+
+<div class="max-w-2xl">
+    <form asp-action="EditDesignation" method="post" class="erp-form-section">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></div>
+        @await Html.PartialAsync("_DesignationFormFields")
+        <div class="erp-form-actions mt-6">
+            <button type="submit" class="erp-btn-primary">Update Designation</button>
+            <a asp-action="Index" asp-route-tab="designations" class="erp-btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }

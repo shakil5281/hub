@@ -1,0 +1,41 @@
+@model IEnumerable<PayrollPeriodVm>
+@{
+    ViewData["Title"] = "Payroll Periods";
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Payroll Periods",
+    Subtitle = "Manage payroll periods and generate sheets"
+})
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+    <table id="periodsTable" data-datatable class="erp-table display w-full">
+        <thead>
+            <tr>
+                <th>Period</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Status</th>
+                <th class="w-12"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="font-medium">@item.Name</td>
+                    <td class="text-muted">@item.StartDate.ToString("dd MMM yyyy")</td>
+                    <td class="text-muted">@item.EndDate.ToString("dd MMM yyyy")</td>
+                    <td>@item.Status</td>
+                    <td>
+                        <form asp-action="Generate" asp-route-periodId="@item.Id" method="post" class="inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="erp-btn-secondary text-xs">Generate</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")

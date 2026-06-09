@@ -1,0 +1,47 @@
+@using ERP.Web.Models
+@{
+    var dashHref = Url.Action("Index", "Home")!;
+    var empCreateHref = Url.Action("Create", "Employee", new { area = "HR" })!;
+    var isDashActive = Context.Request.Path.Value == dashHref || Context.Request.Path.Value == "/";
+}
+<aside class="erp-sidebar"
+       :class="{ '-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen }">
+    <div class="erp-sidebar-brand">
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-white shadow-sm">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+        <div class="min-w-0">
+            <div class="truncate text-sm font-semibold">ERP Hub</div>
+            <div class="truncate text-xs text-muted">Enterprise HR Suite</div>
+        </div>
+    </div>
+
+    <nav class="erp-sidebar-nav pt-2">
+        @await Html.PartialAsync("Partials/_SidebarLink", ("Dashboard", dashHref, "dashboard", isDashActive))
+
+        @await Html.PartialAsync("Partials/_SidebarGroup", new SidebarGroupVm { Title = "Administration", Links = new[] {
+            new SidebarLinkVm { Label = "Users", Href = Url.Action("Index", "User", new { area = "Admin" })!, Icon = "users" },
+            new SidebarLinkVm { Label = "Roles", Href = Url.Action("Index", "Role", new { area = "Admin" })!, Icon = "shield" }
+        }})
+        @await Html.PartialAsync("Partials/_SidebarGroup", new SidebarGroupVm { Title = "Company", Links = new[] {
+            new SidebarLinkVm { Label = "Profile", Href = Url.Action("Index", "Company", new { area = "Company" })!, Icon = "building" },
+            new SidebarLinkVm { Label = "Organogram", Href = Url.Action("Index", "Organogram", new { area = "Company" })!, Icon = "file" }
+        }})
+        @await Html.PartialAsync("Partials/_SidebarGroup", new SidebarGroupVm { Title = "Human Resources", Links = new[] {
+            new SidebarLinkVm { Label = "Employees", Href = Url.Action("Index", "Employee", new { area = "HR" })!, Icon = "briefcase" }
+        }})
+        @await Html.PartialAsync("Partials/_SidebarGroup", new SidebarGroupVm { Title = "Operations", Links = new[] {
+            new SidebarLinkVm { Label = "Shifts", Href = Url.Action("Index", "Shift", new { area = "Shift" })!, Icon = "clock" },
+            new SidebarLinkVm { Label = "Assignments", Href = Url.Action("Assignments", "Shift", new { area = "Shift" })!, Icon = "clock" },
+            new SidebarLinkVm { Label = "Punch Records", Href = Url.Action("Index", "Punch", new { area = "Attendance" })!, Icon = "calendar" },
+            new SidebarLinkVm { Label = "Attendance", Href = Url.Action("Daily", "Attendance", new { area = "Attendance" })!, Icon = "calendar" },
+            new SidebarLinkVm { Label = "Reports", Href = Url.Action("Report", "Attendance", new { area = "Attendance" })!, Icon = "file" }
+        }})
+        @await Html.PartialAsync("Partials/_SidebarGroup", new SidebarGroupVm { Title = "Payroll & Leave", Links = new[] {
+            new SidebarLinkVm { Label = "Leave", Href = Url.Action("Applications", "Leave", new { area = "Leave" })!, Icon = "calendar" },
+            new SidebarLinkVm { Label = "Salary Process", Href = Url.Action("Periods", "Payroll", new { area = "Payroll" })!, Icon = "wallet" },
+            new SidebarLinkVm { Label = "Advances", Href = Url.Action("Advances", "Payroll", new { area = "Payroll" })!, Icon = "wallet" }
+        }})
+    </nav>
+</aside>
+<div class="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm lg:hidden" x-show="sidebarOpen" @@click="sidebarOpen = false" x-cloak></div>

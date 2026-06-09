@@ -1,0 +1,91 @@
+@model IEnumerable<EmployeeListItemVm>
+@using ERP.Web.Core.DTOs
+@{
+    ViewData["Title"] = "Employees";
+    var filter = ViewBag.Filter as EmployeeFilterDto ?? new EmployeeFilterDto();
+    var rowCount = Model.Count();
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Employees",
+    Subtitle = "Manage workforce records with advanced search and filters",
+    Actions =
+    [
+        ("Export Excel", Url.Action("Export")!, "secondary"),
+        ("Import", Url.Action("Import")!, "secondary"),
+        ("Add Employee", Url.Action("Create")!, "primary")
+    ]
+})
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_EmployeeFilter.cshtml", filter)
+
+<div x-data="{ selected: [] }">
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", rowCount)
+        <table id="employeesTable" data-datatable data-dt-options='{"columnDefs":[{"orderable":false,"targets":[0,9]}]}' class="erp-table display w-full">
+            <thead>
+                <tr>
+                    <th class="w-10"><input type="checkbox" class="rounded border-border" id="selectAllRows" /></th>
+                    <th>Code</th>
+                    <th>Employee</th>
+                    <th>Department</th>
+                    <th>Section</th>
+                    <th>Designation</th>
+                    <th>Joined</th>
+                    <th>Salary</th>
+                    <th>Status</th>
+                    <th class="w-12"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><input type="checkbox" class="row-check rounded border-border" value="@item.Id" /></td>
+                        <td class="font-medium">@item.EmployeeCode</td>
+                        <td>
+                            <div class="font-medium text-foreground">@item.FullName</div>
+                            <div class="text-xs text-muted">Punch @item.PunchNumber · @item.LineName</div>
+                        </td>
+                        <td><span class="erp-badge erp-badge-neutral">@item.DepartmentName</span></td>
+                        <td class="text-muted">@item.SectionName</td>
+                        <td class="text-muted">@item.DesignationTitle</td>
+                        <td class="text-muted">@item.JoiningDate.ToString("dd MMM yyyy")</td>
+                        <td class="font-medium">@item.GrossSalary.ToString("N2")</td>
+                        <td>
+                            @if (item.Status == EntityStatus.Active)
+                            {
+                                <span class="erp-badge erp-badge-success">✓ @item.Status</span>
+                            }
+                            else
+                            {
+                                <span class="erp-badge erp-badge-warning">@item.Status</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="relative" x-data="{ open: false }">
+                                <button type="button" @@click="open = !open" class="erp-btn-ghost h-8 w-8 p-0">⋯</button>
+                                <div x-show="open" @@click.outside="open = false" x-cloak class="absolute right-0 z-10 mt-1 w-36 rounded-md border border-border bg-white py-1 shadow-lg">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="block px-3 py-1.5 text-sm hover:bg-accent">View</a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="block px-3 py-1.5 text-sm hover:bg-accent">Edit</a>
+                                    <button type="button" class="block w-full px-3 py-1.5 text-left text-sm text-red-600 hover:bg-accent" @@click="$dispatch('confirm-delete', 'delete-form-@item.Id'); open = false">Delete</button>
+                                </div>
+                            </div>
+                            <form id="delete-form-@item.Id" asp-action="Delete" asp-route-id="@item.Id" method="post" class="hidden">@Html.AntiForgeryToken()</form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ConfirmDelete.cshtml")
+
+@section Scripts {
+    <script>
+        document.getElementById('selectAllRows')?.addEventListener('change', function (e) {
+            document.querySelectorAll('.row-check').forEach(cb => cb.checked = e.target.checked);
+        });
+    </script>
+}

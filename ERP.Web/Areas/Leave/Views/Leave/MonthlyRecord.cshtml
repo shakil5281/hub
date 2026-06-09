@@ -1,0 +1,95 @@
+@model IEnumerable<MonthlyLeaveRecordVm>
+@{
+    ViewData["Title"] = "Monthly Leave Record";
+    var year = (int)ViewBag.Year;
+    var month = (int)ViewBag.Month;
+    var monthName = new DateTime(year, month, 1).ToString("MMMM yyyy");
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Monthly Leave Record",
+    Subtitle = "Employee leave summary for the month",
+    Actions = [("Export Excel", Url.Action("ExportMonthlyLeaveRecord", new { year, month })!, "secondary")]
+})
+
+<div class="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <form method="get" class="flex flex-wrap gap-3 items-end">
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Year</label>
+            <input type="number" name="year" value="@year" class="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Month</label>
+            <select name="month" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                @for (var m = 1; m <= 12; m++)
+                {
+                    var monthLabel = new DateTime(year, m, 1).ToString("MMMM");
+                    <option value="@m" selected="@(m == month)">@monthLabel</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">View</button>
+    </form>
+</div>
+
+<div class="mb-4 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm text-sm text-slate-600">
+    Showing leave records for <strong>@monthName</strong> — <strong>@Model.Count()</strong> employees with leaves
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+<table id="monthlyLeaveTable" data-datatable class="erp-table display w-full">
+    <thead>
+        <tr>
+            <th>Code</th><th>Name</th><th>Department</th>
+            <th>Total</th><th>Approved</th><th>Pending</th><th>Rejected</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr class="cursor-pointer" data-bs-toggle="collapse" data-bs-target="#details-@item.EmployeeCode">
+                <td>@item.EmployeeCode</td>
+                <td class="font-medium">@item.EmployeeName</td>
+                <td>@item.Department</td>
+                <td><span class="font-semibold">@item.TotalLeaves</span></td>
+                <td><span class="text-green-600 font-medium">@item.ApprovedLeaves</span></td>
+                <td><span class="text-yellow-600 font-medium">@item.PendingLeaves</span></td>
+                <td><span class="text-red-600 font-medium">@item.RejectedLeaves</span></td>
+            </tr>
+            @if (item.Details.Any())
+            {
+                <tr>
+                    <td colspan="7" class="p-0 bg-slate-50">
+                        <div class="px-6 py-2">
+                            <table class="w-full text-xs">
+                                <thead>
+                                    <tr class="text-slate-500">
+                                        <th class="py-1 text-left">Leave Type</th>
+                                        <th class="py-1 text-left">From</th>
+                                        <th class="py-1 text-left">To</th>
+                                        <th class="py-1 text-left">Days</th>
+                                        <th class="py-1 text-left">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var d in item.Details)
+                                    {
+                                        <tr>
+                                            <td class="py-1">@d.LeaveType</td>
+                                            <td class="py-1">@d.FromDate.ToString("dd MMM")</td>
+                                            <td class="py-1">@d.ToDate.ToString("dd MMM")</td>
+                                            <td class="py-1">@d.Days</td>
+                                            <td class="py-1">@d.Status</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")

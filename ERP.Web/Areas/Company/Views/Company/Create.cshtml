@@ -1,0 +1,35 @@
+@model CompanyEditVm
+@{
+    ViewData["Title"] = "Add Company";
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Add Company",
+    Subtitle = "Create a new company record",
+    Actions = [("Back to list", Url.Action("Index")!, "secondary")]
+})
+
+<div class="max-w-4xl">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></div>
+
+        <div class="erp-form-section mb-4">
+            <div class="mb-4">
+                <h2 class="erp-form-section-title">Company Information</h2>
+                <p class="erp-form-section-desc">Legal name, code, and contact details.</p>
+            </div>
+            @await Html.PartialAsync("_CompanyFormFields")
+        </div>
+
+        <div class="erp-form-actions">
+            <button type="submit" class="erp-btn-primary">Save Company</button>
+            <a asp-action="Index" class="erp-btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

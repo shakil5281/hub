@@ -1,0 +1,13 @@
+<div x-data="{ open: false, formId: '' }"
+     x-on:confirm-delete.window="formId = $event.detail; open = true">
+    <div x-show="open" x-cloak x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div class="w-full max-w-md rounded-xl border border-border bg-white p-6 shadow-xl">
+            <h3 class="text-lg font-semibold">Confirm delete</h3>
+            <p class="mt-2 text-sm text-muted">This action cannot be undone. The record will be permanently removed from the database.</p>
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" class="erp-btn-secondary" @@click="open = false">Cancel</button>
+                <button type="button" class="erp-btn-danger" @@click="document.getElementById(formId).submit(); open = false">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,15 @@
+@model (string Name, string? Id, string? Value, string? Placeholder, bool Required)
+@{
+    var id = Model.Id ?? Model.Name;
+    var placeholder = Model.Placeholder ?? "Select date";
+}
+<div class="erp-date-field">
+    <input type="date"
+           name="@Model.Name"
+           id="@id"
+           value="@Model.Value"
+           placeholder="@placeholder"
+           class="erp-input erp-datepicker-input"
+           data-datepicker
+           @(Model.Required ? "required" : null) />
+</div>

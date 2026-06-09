@@ -1,0 +1,74 @@
+@model IEnumerable<UserListItemVm>
+@using ERP.Web.Core.DTOs
+@{
+    ViewData["Title"] = "Users";
+    var filter = ViewBag.Filter as UserFilterDto ?? new UserFilterDto();
+    var rowCount = Model.Count();
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Users",
+    Subtitle = "Manage system users and roles with advanced filters",
+    Actions = [("Add User", Url.Action("Create")!, "primary")]
+})
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_UserFilter.cshtml", filter)
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", rowCount)
+    <table id="usersTable" data-datatable data-dt-options='{"columnDefs":[{"orderable":false,"targets":[4]}]}' class="erp-table display w-full">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Roles</th>
+                <th>Status</th>
+                <th class="w-12"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <div class="font-medium text-foreground">@item.FullName</div>
+                    </td>
+                    <td class="text-muted">@item.Email</td>
+                    <td>
+                        @if (item.Roles.Any())
+                        {
+                            @foreach (var role in item.Roles)
+                            {
+                                <span class="erp-badge erp-badge-neutral mr-1">@role</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                    </td>
+                    <td>
+                        @if (item.IsActive)
+                        {
+                            <span class="erp-badge erp-badge-success">✓ Active</span>
+                        }
+                        else
+                        {
+                            <span class="erp-badge erp-badge-warning">Inactive</span>
+                        }
+                    </td>
+                    <td>
+                        @await Html.PartialAsync("~/Views/Shared/Partials/_TableRowActions.cshtml", new List<(string, string?, string?, bool)>
+                        {
+                            ("Edit", Url.Action("Edit", new { id = item.Id }), null, false),
+                            ("Delete", null, $"delete-form-{item.Id}", true)
+                        })
+                        <form id="delete-form-@item.Id" asp-action="Delete" asp-route-id="@item.Id" method="post" class="hidden">@Html.AntiForgeryToken()</form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ConfirmDelete.cshtml")

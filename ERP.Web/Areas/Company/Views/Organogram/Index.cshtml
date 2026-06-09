@@ -1,0 +1,194 @@
+@model OrganogramIndexVm
+@{
+    ViewData["Title"] = "Organogram";
+    var tab = Model.ActiveTab;
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Company Organogram",
+    Subtitle = "Department → Section → Designation & Line hierarchy"
+})
+
+<div x-data="{
+    tab: '@tab',
+    setTab(value) {
+        this.tab = value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', value);
+        history.replaceState(null, '', url);
+    }
+}">
+    <div class="mb-6 overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+        <div class="erp-filter-tabs">
+            <button type="button" @@click="setTab('departments')"
+                    :class="tab === 'departments' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Departments</button>
+            <button type="button" @@click="setTab('sections')"
+                    :class="tab === 'sections' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Sections</button>
+            <button type="button" @@click="setTab('designations')"
+                    :class="tab === 'designations' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Designations</button>
+            <button type="button" @@click="setTab('lines')"
+                    :class="tab === 'lines' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Lines</button>
+        </div>
+    </div>
+
+    <div x-show="tab === 'departments'" x-cloak>
+        <div class="erp-table-shell">
+            <div class="erp-table-toolbar">
+                <p class="text-sm text-muted"><span class="font-medium text-foreground">@Model.Departments.Count</span> record(s) in database</p>
+                <a asp-action="CreateDepartment" class="erp-btn-primary text-xs">Add Department</a>
+            </div>
+            <div class="erp-table-wrap">
+                <table id="departmentsTable" data-datatable data-dt-options='{"columnDefs":[{"orderable":false,"targets":[2]}]}' class="erp-table display w-full">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Code</th>
+                            <th class="w-12"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Departments)
+                        {
+                            <tr>
+                                <td class="font-medium">@item.Name</td>
+                                <td class="text-muted">@item.Code</td>
+                                <td>
+                                    @await Html.PartialAsync("~/Views/Shared/Partials/_TableRowActions.cshtml", new List<(string, string?, string?, bool)>
+                                    {
+                                        ("Edit", Url.Action("EditDepartment", new { id = item.Id }), null, false),
+                                        ("Delete", null, $"delete-dept-{item.Id}", true)
+                                    })
+                                    <form id="delete-dept-@item.Id" asp-action="DeleteDepartment" asp-route-id="@item.Id" method="post" class="hidden">@Html.AntiForgeryToken()</form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="tab === 'sections'" x-cloak>
+        <div class="erp-table-shell">
+            <div class="erp-table-toolbar">
+                <p class="text-sm text-muted"><span class="font-medium text-foreground">@Model.Sections.Count</span> record(s) in database</p>
+                <a asp-action="CreateSection" class="erp-btn-primary text-xs">Add Section</a>
+            </div>
+            <div class="erp-table-wrap">
+                <table id="sectionsTable" data-datatable data-dt-options='{"columnDefs":[{"orderable":false,"targets":[3]}]}' class="erp-table display w-full">
+                    <thead>
+                        <tr>
+                            <th>Department</th>
+                            <th>Name</th>
+                            <th>Code</th>
+                            <th class="w-12"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Sections)
+                        {
+                            <tr>
+                                <td><span class="erp-badge erp-badge-neutral">@(item.DepartmentName ?? "—")</span></td>
+                                <td class="font-medium">@item.Name</td>
+                                <td class="text-muted">@item.Code</td>
+                                <td>
+                                    @await Html.PartialAsync("~/Views/Shared/Partials/_TableRowActions.cshtml", new List<(string, string?, string?, bool)>
+                                    {
+                                        ("Edit", Url.Action("EditSection", new { id = item.Id }), null, false),
+                                        ("Delete", null, $"delete-sec-{item.Id}", true)
+                                    })
+                                    <form id="delete-sec-@item.Id" asp-action="DeleteSection" asp-route-id="@item.Id" method="post" class="hidden">@Html.AntiForgeryToken()</form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="tab === 'designations'" x-cloak>
+        <div class="erp-table-shell">
+            <div class="erp-table-toolbar">
+                <p class="text-sm text-muted"><span class="font-medium text-foreground">@Model.Designations.Count</span> record(s) in database</p>
+                <a asp-action="CreateDesignation" class="erp-btn-primary text-xs">Add Designation</a>
+            </div>
+            <div class="erp-table-wrap">
+                <table id="designationsTable" data-datatable data-dt-options='{"columnDefs":[{"orderable":false,"targets":[4]}]}' class="erp-table display w-full">
+                    <thead>
+                        <tr>
+                            <th>Department</th>
+                            <th>Section</th>
+                            <th>Title</th>
+                            <th>Code</th>
+                            <th class="w-12"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Designations)
+                        {
+                            <tr>
+                                <td><span class="erp-badge erp-badge-neutral">@(item.DepartmentName ?? "—")</span></td>
+                                <td><span class="erp-badge erp-badge-neutral">@(item.SectionName ?? "—")</span></td>
+                                <td class="font-medium">@item.Title</td>
+                                <td class="text-muted">@item.Code</td>
+                                <td>
+                                    @await Html.PartialAsync("~/Views/Shared/Partials/_TableRowActions.cshtml", new List<(string, string?, string?, bool)>
+                                    {
+                                        ("Edit", Url.Action("EditDesignation", new { id = item.Id }), null, false),
+                                        ("Delete", null, $"delete-des-{item.Id}", true)
+                                    })
+                                    <form id="delete-des-@item.Id" asp-action="DeleteDesignation" asp-route-id="@item.Id" method="post" class="hidden">@Html.AntiForgeryToken()</form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="tab === 'lines'" x-cloak>
+        <div class="erp-table-shell">
+            <div class="erp-table-toolbar">
+                <p class="text-sm text-muted"><span class="font-medium text-foreground">@Model.Lines.Count</span> record(s) in database</p>
+                <a asp-action="CreateLine" class="erp-btn-primary text-xs">Add Line</a>
+            </div>
+            <div class="erp-table-wrap">
+                <table id="linesTable" data-datatable data-dt-options='{"columnDefs":[{"orderable":false,"targets":[4]}]}' class="erp-table display w-full">
+                    <thead>
+                        <tr>
+                            <th>Department</th>
+                            <th>Section</th>
+                            <th>Name</th>
+                            <th>Code</th>
+                            <th class="w-12"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Lines)
+                        {
+                            <tr>
+                                <td><span class="erp-badge erp-badge-neutral">@(item.DepartmentName ?? "—")</span></td>
+                                <td><span class="erp-badge erp-badge-neutral">@(item.SectionName ?? "—")</span></td>
+                                <td class="font-medium">@item.Name</td>
+                                <td class="text-muted">@item.Code</td>
+                                <td>
+                                    @await Html.PartialAsync("~/Views/Shared/Partials/_TableRowActions.cshtml", new List<(string, string?, string?, bool)>
+                                    {
+                                        ("Edit", Url.Action("EditLine", new { id = item.Id }), null, false),
+                                        ("Delete", null, $"delete-line-{item.Id}", true)
+                                    })
+                                    <form id="delete-line-@item.Id" asp-action="DeleteLine" asp-route-id="@item.Id" method="post" class="hidden">@Html.AntiForgeryToken()</form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ConfirmDelete.cshtml")

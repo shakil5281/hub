@@ -1,0 +1,125 @@
+@model MonthlyReportVm?
+@{
+    ViewData["Title"] = "Monthly Report";
+    var year = (int)ViewBag.Year;
+    var month = (int)ViewBag.Month;
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Monthly HR Report",
+    Subtitle = "Comprehensive monthly summary — attendance, payroll, leave, overtime"
+})
+
+<div class="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <form asp-action="Generate" method="post" class="flex flex-wrap gap-3 items-end">
+        @Html.AntiForgeryToken()
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Year</label>
+            <input type="number" name="year" value="@year" class="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Month</label>
+            <select name="month" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                @for (var m = 1; m <= 12; m++)
+                {
+                    var monthLabel = new DateTime(year, m, 1).ToString("MMMM");
+                    <option value="@m" selected="@(m == month)">@monthLabel</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Generate Report</button>
+        @if (Model != null)
+        {
+            <a href="@Url.Action("ExportExcel", new { year = Model.Year, month = Model.Month })" class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">Export Excel</a>
+            <a href="@Url.Action("ExportPdf", new { year = Model.Year, month = Model.Month })" class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">Export PDF</a>
+        }
+    </form>
+</div>
+
+@if (Model != null)
+{
+    <div class="mb-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-800 shadow-sm">
+        Report for: <strong>@Model.MonthName</strong>
+    </div>
+
+    <div class="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="text-xs text-slate-500">Total Employees</div>
+            <div class="mt-1 text-2xl font-bold text-slate-900">@Model.TotalEmployees</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="text-xs text-slate-500">Present Days</div>
+            <div class="mt-1 text-2xl font-bold text-green-600">@Model.TotalPresent</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="text-xs text-slate-500">Absent Days</div>
+            <div class="mt-1 text-2xl font-bold text-red-600">@Model.TotalAbsent</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="text-xs text-slate-500">Leave Days</div>
+            <div class="mt-1 text-2xl font-bold text-orange-500">@Model.TotalLeaves</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="text-xs text-slate-500">Holidays</div>
+            <div class="mt-1 text-2xl font-bold text-purple-600">@Model.TotalHolidays</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="text-xs text-slate-500">OT Hours</div>
+            <div class="mt-1 text-2xl font-bold text-blue-600">@Model.TotalOtHours.ToString("N2")</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="text-xs text-slate-500">Total Payroll</div>
+            <div class="mt-1 text-2xl font-bold text-slate-900">@Model.TotalPayroll.ToString("N2")</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="text-xs text-slate-500">Total Bonus</div>
+            <div class="mt-1 text-2xl font-bold text-emerald-600">@Model.TotalBonus.ToString("N2")</div>
+        </div>
+    </div>
+
+    <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-200 px-4 py-3 text-sm font-semibold text-slate-900">By Department</div>
+        <div class="overflow-x-auto">
+            <table class="erp-table w-full">
+                <thead>
+                    <tr>
+                        <th>Department</th><th>Employees</th><th>Present Days</th>
+                        <th>Absent Days</th><th>Gross Salary</th><th>Net Salary</th><th>OT Hours</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var dept in Model.ByDepartment)
+                    {
+                        <tr>
+                            <td class="font-medium">@dept.Department</td>
+                            <td>@dept.EmployeeCount</td>
+                            <td class="text-green-600">@dept.PresentDays</td>
+                            <td class="text-red-600">@dept.AbsentDays</td>
+                            <td>@dept.TotalGross.ToString("N2")</td>
+                            <td class="font-semibold">@dept.TotalNet.ToString("N2")</td>
+                            <td class="text-blue-600">@dept.TotalOt.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="font-semibold bg-slate-50">
+                        <td class="px-4 py-2">Total</td>
+                        <td class="px-4 py-2">@Model.ByDepartment.Sum(d => d.EmployeeCount)</td>
+                        <td class="px-4 py-2 text-green-600">@Model.ByDepartment.Sum(d => d.PresentDays)</td>
+                        <td class="px-4 py-2 text-red-600">@Model.ByDepartment.Sum(d => d.AbsentDays)</td>
+                        <td class="px-4 py-2">@Model.ByDepartment.Sum(d => d.TotalGross).ToString("N2")</td>
+                        <td class="px-4 py-2">@Model.ByDepartment.Sum(d => d.TotalNet).ToString("N2")</td>
+                        <td class="px-4 py-2 text-blue-600">@Model.ByDepartment.Sum(d => d.TotalOt).ToString("N2")</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="rounded-xl border border-slate-200 bg-white p-12 text-center text-slate-500 shadow-sm">
+        <p class="text-lg font-medium">Select a year and month, then click <strong>Generate Report</strong>.</p>
+    </div>
+}

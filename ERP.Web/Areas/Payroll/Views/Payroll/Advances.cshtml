@@ -1,0 +1,79 @@
+@model IEnumerable<AdvanceSalaryVm>
+@{
+    ViewData["Title"] = "Salary Advances";
+    var employees = (IReadOnlyList<EmployeeListItemVm>)ViewBag.Employees!;
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Salary Advances",
+    Subtitle = "Manage employee salary advances"
+})
+
+<div class="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <h2 class="mb-3 text-sm font-semibold text-slate-900">New Advance</h2>
+    <form asp-action="SaveAdvance" method="post" class="grid gap-3 md:grid-cols-5 md:items-end">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="Id" value="0" />
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Employee</label>
+            <select name="EmployeeId" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                @foreach (var e in employees)
+                {
+                    <option value="@e.Id">@e.FullName</option>
+                }
+            </select>
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Amount</label>
+            <input name="Amount" type="number" step="0.01" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Monthly Deduction</label>
+            <input name="MonthlyDeduction" type="number" step="0.01" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Reason</label>
+            <input name="Reason" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Save</button>
+        </div>
+    </form>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+    <table id="advancesTable" data-datatable class="erp-table display w-full">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Amount</th>
+                <th>Monthly Ded.</th>
+                <th>Remaining</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.EmployeeName</td>
+                    <td>@item.Amount.ToString("N2")</td>
+                    <td>@item.MonthlyDeduction.ToString("N2")</td>
+                    <td>@item.RemainingBalance.ToString("N2")</td>
+                    <td>@item.Status</td>
+                    <td>
+                        @if (item.Status == "Pending")
+                        {
+                            <form asp-action="ApproveAdvance" asp-route-id="@item.Id" method="post" class="inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="text-blue-600 hover:underline">Approve</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")

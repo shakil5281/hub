@@ -1,0 +1,28 @@
+@model SectionVm
+@{
+    var departments = (IReadOnlyList<DepartmentVm>)(ViewBag.Departments ?? Array.Empty<DepartmentVm>());
+}
+<input type="hidden" asp-for="Id" />
+<div class="grid gap-4 sm:grid-cols-2">
+    <div>
+        <label asp-for="DepartmentId" class="erp-label">Department</label>
+        <select asp-for="DepartmentId" class="erp-input">
+            <option value="">Select department</option>
+            @foreach (var d in departments)
+            {
+                <option value="@d.Id">@d.Name</option>
+            }
+        </select>
+        <span asp-validation-for="DepartmentId" class="text-xs text-red-600"></span>
+    </div>
+    <div>
+        <label asp-for="Name" class="erp-label"></label>
+        <input asp-for="Name" class="erp-input" />
+        <span asp-validation-for="Name" class="text-xs text-red-600"></span>
+    </div>
+    <div>
+        <label asp-for="Code" class="erp-label"></label>
+        <input asp-for="Code" class="erp-input" />
+        <span asp-validation-for="Code" class="text-xs text-red-600"></span>
+    </div>
+</div>

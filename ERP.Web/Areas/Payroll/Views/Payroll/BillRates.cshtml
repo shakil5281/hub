@@ -1,0 +1,71 @@
+@model IEnumerable<BillRateConfigVm>
+@{
+    ViewData["Title"] = "Bill Rates";
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Bill Rates",
+    Subtitle = "Configure night and holiday bill rates"
+})
+
+<div class="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <h2 class="mb-3 text-sm font-semibold text-slate-900">Add Rate</h2>
+    <form asp-action="SaveBillRate" method="post" class="flex flex-wrap items-end gap-3">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="Id" value="0" />
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Bill Type</label>
+            <select name="BillType" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                    asp-items="Html.GetEnumSelectList<ERP.Web.Core.Enums.BillType>()"></select>
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Rate Type</label>
+            <select name="RateType" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                    asp-items="Html.GetEnumSelectList<ERP.Web.Core.Enums.BillRateType>()"></select>
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Amount</label>
+            <input name="Amount" type="number" step="0.01" required class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Add</button>
+    </form>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+    <table id="billRatesTable" data-datatable class="erp-table display w-full">
+        <thead>
+            <tr><th>Bill Type</th><th>Rate Type</th><th>Amount</th><th>Shift</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <form asp-action="SaveBillRate" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="Id" value="@item.Id" />
+                        <td>
+                            <select name="BillType" class="rounded border border-slate-300 px-2 py-1 text-sm">
+                                @foreach (ERP.Web.Core.Enums.BillType bt in Enum.GetValues<ERP.Web.Core.Enums.BillType>())
+                                {
+                                    <option value="@((int)bt)" selected="@(item.BillType == (int)bt)">@bt</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select name="RateType" class="rounded border border-slate-300 px-2 py-1 text-sm">
+                                @foreach (ERP.Web.Core.Enums.BillRateType rt in Enum.GetValues<ERP.Web.Core.Enums.BillRateType>())
+                                {
+                                    <option value="@((int)rt)" selected="@(item.RateType == (int)rt)">@rt</option>
+                                }
+                            </select>
+                        </td>
+                        <td><input name="Amount" type="number" step="0.01" value="@item.Amount" class="w-24 rounded border border-slate-300 px-2 py-1 text-sm" /></td>
+                        <td>@(item.ShiftName ?? "All")</td>
+                        <td><button type="submit" class="text-blue-600 hover:underline">Save</button></td>
+                    </form>
+                </tr>
+            }
+        </tbody>
+    </table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")

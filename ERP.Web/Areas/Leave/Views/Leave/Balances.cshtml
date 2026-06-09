@@ -1,0 +1,69 @@
+@model IEnumerable<LeaveBalanceVm>
+@{
+    ViewData["Title"] = "Leave Balances";
+    var employees = (IReadOnlyList<EmployeeListItemVm>)ViewBag.Employees!;
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Leave Balances",
+    Subtitle = "View and adjust employee leave balances"
+})
+
+<form method="get" class="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div>
+        <label class="mb-1 block text-xs font-medium text-slate-600">Employee</label>
+        <select name="employeeId" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <option value="">All</option>
+            @foreach (var e in employees)
+            {
+                <option value="@e.Id">@e.FullName</option>
+            }
+        </select>
+    </div>
+    <button type="submit" class="rounded-lg bg-slate-800 px-4 py-2 text-sm text-white hover:bg-slate-900">Filter</button>
+</form>
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+    <table id="balancesTable" data-datatable class="erp-table display w-full">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Leave Type</th>
+                <th>Year</th>
+                <th>Allocated</th>
+                <th>Used</th>
+                <th>Remaining</th>
+                <th>Adjust</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.EmployeeName</td>
+                    <td>@item.LeaveTypeName</td>
+                    <td>@item.Year</td>
+                    <td>@item.AllocatedDays</td>
+                    <td>@item.UsedDays</td>
+                    <td>@item.RemainingDays</td>
+                    <td>
+                        <form asp-action="AdjustBalance" method="post" class="flex items-center gap-1">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="Id" value="@item.Id" />
+                            <input type="hidden" name="EmployeeId" value="@item.EmployeeId" />
+                            <input type="hidden" name="LeaveTypeId" value="@item.LeaveTypeId" />
+                            <input type="hidden" name="Year" value="@item.Year" />
+                            <input type="hidden" name="EmployeeName" value="@item.EmployeeName" />
+                            <input type="hidden" name="LeaveTypeName" value="@item.LeaveTypeName" />
+                            <input type="hidden" name="UsedDays" value="@item.UsedDays" />
+                            <input type="hidden" name="RemainingDays" value="@item.RemainingDays" />
+                            <input name="AllocatedDays" type="number" value="@item.AllocatedDays" class="w-16 rounded border border-slate-300 px-1 py-0.5 text-sm" />
+                            <button type="submit" class="text-blue-600 hover:underline">Save</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")

@@ -1,0 +1,48 @@
+@model ERP.Web.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "_Layout";
+}
+
+<div class="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+    <div class="w-full max-w-sm">
+        <div class="mb-8 text-center">
+            <div class="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-white shadow-sm">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+            </div>
+            <h1 class="text-2xl font-semibold tracking-tight">ERP Hub</h1>
+            <p class="mt-2 text-sm text-muted">Sign in to your account</p>
+        </div>
+        <div class="rounded-xl border border-border bg-white p-6 shadow-sm">
+            <form asp-action="Login" method="post" class="space-y-4">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                <div asp-validation-summary="ModelOnly" class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"></div>
+
+                <div>
+                    <label asp-for="Email" class="erp-label"></label>
+                    <input asp-for="Email" class="erp-input" placeholder="admin@erp.com" />
+                    <span asp-validation-for="Email" class="text-xs text-red-600"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Password" class="erp-label"></label>
+                    <input asp-for="Password" class="erp-input" />
+                    <span asp-validation-for="Password" class="text-xs text-red-600"></span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <input asp-for="RememberMe" type="checkbox" class="rounded border-border" />
+                    <label asp-for="RememberMe" class="text-sm text-muted"></label>
+                </div>
+
+                <button type="submit" class="erp-btn-primary w-full">Sign in</button>
+            </form>
+            <p class="mt-4 text-center text-xs text-muted">Default: admin@erp.com / Admin@123</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

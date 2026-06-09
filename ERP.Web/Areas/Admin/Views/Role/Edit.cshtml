@@ -1,0 +1,63 @@
+@model RoleEditVm
+@{
+    ViewData["Title"] = "Edit Role";
+    var permissions = (IList<PermissionItemVm>)ViewBag.Permissions!;
+    var selectedIds = Model.PermissionIds.ToHashSet();
+    var grouped = permissions.GroupBy(p => p.Module).OrderBy(g => g.Key);
+}
+
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-slate-900">Edit Role</h1>
+</div>
+
+<div class="max-w-3xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <div asp-validation-summary="ModelOnly" class="mb-4 text-sm text-red-600"></div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+            <div>
+                <label asp-for="Name" class="mb-1 block text-sm font-medium text-slate-700"></label>
+                <input asp-for="Name" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                <span asp-validation-for="Name" class="text-sm text-red-600"></span>
+            </div>
+            <div>
+                <label asp-for="Description" class="mb-1 block text-sm font-medium text-slate-700"></label>
+                <input asp-for="Description" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <h2 class="mb-3 text-sm font-semibold text-slate-900">Permissions</h2>
+            <div class="space-y-4">
+                @foreach (var group in grouped)
+                {
+                    <div class="rounded-lg border border-slate-200 p-4">
+                        <h3 class="mb-2 text-sm font-medium text-slate-700">@group.Key</h3>
+                        <div class="grid gap-2 sm:grid-cols-2">
+                            @foreach (var perm in group)
+                            {
+                                <label class="flex items-center gap-2 text-sm text-slate-600">
+                                    <input type="checkbox" name="selectedPermissions" value="@perm.Id"
+                                           checked="@(selectedIds.Contains(perm.Id) || perm.IsSelected)"
+                                           class="rounded border-slate-300" />
+                                    <span>@perm.Name</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="mt-6 flex gap-3">
+            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Update</button>
+            <a asp-action="Index" class="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

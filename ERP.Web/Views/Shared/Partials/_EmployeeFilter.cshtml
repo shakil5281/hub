@@ -1,0 +1,99 @@
+@using ERP.Web.Core.DTOs
+@using ERP.Web.Core.Enums
+@model EmployeeFilterDto
+@{
+    var lookups = (ERP.Web.Areas.HR.ViewModels.EmployeeFormLookupsVm)(ViewBag.Lookups ?? new ERP.Web.Areas.HR.ViewModels.EmployeeFormLookupsVm());
+    var action = ViewBag.FilterAction as string ?? Url.Action("Index")!;
+}
+
+<div class="erp-filter-panel mb-6" x-data="{ tab: 'filters', showSave: false, presetName: '' }">
+    <div class="erp-filter-tabs">
+        <button type="button" @@click="tab = 'filters'" :class="tab === 'filters' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Filters</button>
+        <button type="button" @@click="tab = 'presets'" :class="tab === 'presets' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Saved Presets</button>
+    </div>
+    <div class="erp-filter-header">
+        <div>
+            <p class="text-sm font-semibold">Employee Database Filters</p>
+            <p class="text-xs text-muted">Search, segment, and export workforce records</p>
+        </div>
+        <div class="flex gap-2">
+            <button type="button" @@click="showSave = !showSave" class="erp-btn-secondary text-xs">Save Preset</button>
+            <a href="@action" class="erp-btn-ghost text-xs">Reset all</a>
+        </div>
+    </div>
+    <div x-show="showSave" x-cloak class="border-b border-border bg-neutral-50 px-4 py-3">
+        <div class="flex flex-wrap items-end gap-3">
+            <div class="min-w-[200px] flex-1">
+                <label class="erp-label-muted">Preset name</label>
+                <input type="text" x-model="presetName" class="erp-input" placeholder="Active employees" />
+            </div>
+            <button type="button" class="erp-btn-primary" @@click="erpSaveFilterPreset('Employee', presetName, document.getElementById('employeeFilterForm'))">Save</button>
+        </div>
+    </div>
+    <div class="erp-filter-body" x-show="tab === 'filters'">
+        <form id="employeeFilterForm" method="get" action="@action" class="erp-filter-grid">
+            <div class="sm:col-span-2 lg:col-span-2">
+                <label class="erp-label-muted">Search</label>
+                <input type="text" name="Search" value="@Model.Search" placeholder="Name, code, punch number…" class="erp-input" />
+            </div>
+            <div>
+                <label class="erp-label-muted">Department</label>
+                <select name="DepartmentId" class="erp-input">
+                    <option value="">All departments</option>
+                    @foreach (var d in lookups.Departments) { <option value="@d.Id" selected="@(Model.DepartmentId == d.Id)">@d.Name</option> }
+                </select>
+            </div>
+            <div>
+                <label class="erp-label-muted">Section</label>
+                <select name="SectionId" class="erp-input">
+                    <option value="">All sections</option>
+                    @foreach (var s in lookups.Sections) { <option value="@s.Id" selected="@(Model.SectionId == s.Id)">@s.Name</option> }
+                </select>
+            </div>
+            <div>
+                <label class="erp-label-muted">Line</label>
+                <select name="LineId" class="erp-input">
+                    <option value="">All lines</option>
+                    @foreach (var l in lookups.Lines) { <option value="@l.Id" selected="@(Model.LineId == l.Id)">@l.Name</option> }
+                </select>
+            </div>
+            <div>
+                <label class="erp-label-muted">Designation</label>
+                <select name="DesignationId" class="erp-input">
+                    <option value="">All designations</option>
+                    @foreach (var d in lookups.Designations) { <option value="@d.Id" selected="@(Model.DesignationId == d.Id)">@d.Name</option> }
+                </select>
+            </div>
+            <div>
+                <label class="erp-label-muted">Status</label>
+                <select name="Status" class="erp-input">
+                    <option value="">All statuses</option>
+                    @foreach (EntityStatus s in Enum.GetValues<EntityStatus>())
+                    { <option value="@((int)s)" selected="@(Model.Status == s)">@s</option> }
+                </select>
+            </div>
+            <div>
+                <label class="erp-label-muted">Joining from</label>
+                <input type="date" name="JoiningFrom" value="@Model.JoiningFrom?.ToString("yyyy-MM-dd")" class="erp-input" data-datepicker placeholder="From date" />
+            </div>
+            <div>
+                <label class="erp-label-muted">Joining to</label>
+                <input type="date" name="JoiningTo" value="@Model.JoiningTo?.ToString("yyyy-MM-dd")" class="erp-input" data-datepicker placeholder="To date" />
+            </div>
+            <div>
+                <label class="erp-label-muted">Min salary</label>
+                <input type="number" step="0.01" name="MinSalary" value="@Model.MinSalary" class="erp-input" placeholder="0.00" />
+            </div>
+            <div>
+                <label class="erp-label-muted">Max salary</label>
+                <input type="number" step="0.01" name="MaxSalary" value="@Model.MaxSalary" class="erp-input" placeholder="0.00" />
+            </div>
+            <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-4">
+                <button type="submit" class="erp-btn-primary">Apply filters</button>
+            </div>
+        </form>
+    </div>
+    <div class="erp-filter-body" x-show="tab === 'presets'" x-cloak>
+        <div id="preset-list-Employee" class="text-sm text-muted">No saved presets yet.</div>
+    </div>
+</div>

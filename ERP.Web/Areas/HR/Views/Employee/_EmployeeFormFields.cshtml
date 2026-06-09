@@ -1,0 +1,450 @@
+@model EmployeeFormVm
+@{
+    var lookups = (EmployeeFormLookupsVm)ViewBag.Lookups!;
+    var activeTab = ViewBag.ActiveTab as string ?? "personal";
+    var signatureJson = System.Text.Json.JsonSerializer.Serialize(Model.SignatureData ?? "");
+}
+
+<div x-data="employeeForm('@activeTab', @Model.DepartmentId, @Model.SectionId, @Model.LineId, @Model.DesignationId)" x-init="init()">
+    <div class="mb-6 overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+        <div class="erp-filter-tabs">
+            <button type="button" @@click="setTab('personal')"
+                    :class="tab === 'personal' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Personal</button>
+            <button type="button" @@click="setTab('office')"
+                    :class="tab === 'office' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Office</button>
+            <button type="button" @@click="setTab('address')"
+                    :class="tab === 'address' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Address</button>
+            <button type="button" @@click="setTab('salary')"
+                    :class="tab === 'salary' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Salary</button>
+            <button type="button" @@click="setTab('account')"
+                    :class="tab === 'account' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Account</button>
+            <button type="button" @@click="setTab('family')"
+                    :class="tab === 'family' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Family</button>
+            <button type="button" @@click="setTab('signature')"
+                    :class="tab === 'signature' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Signature</button>
+        </div>
+    </div>
+
+    <div x-show="tab === 'personal'" x-cloak class="erp-form-section">
+        <div class="mb-4">
+            <h2 class="erp-form-section-title">Personal Information</h2>
+            <p class="erp-form-section-desc">Basic identity and contact details for the employee.</p>
+        </div>
+        <div class="erp-form-grid">
+            <div>
+                <label asp-for="EmployeeCode" class="erp-label"></label>
+                <input asp-for="EmployeeCode" class="erp-input" placeholder="EMP-001" />
+                <span asp-validation-for="EmployeeCode" class="text-xs text-red-600"></span>
+            </div>
+            <div>
+                <label asp-for="PunchNumber" class="erp-label"></label>
+                <input asp-for="PunchNumber" class="erp-input" placeholder="1001" />
+                <span asp-validation-for="PunchNumber" class="text-xs text-red-600"></span>
+            </div>
+            <div class="sm:col-span-2">
+                <label asp-for="FullName" class="erp-label"></label>
+                <input asp-for="FullName" class="erp-input" placeholder="Full legal name" />
+                <span asp-validation-for="FullName" class="text-xs text-red-600"></span>
+            </div>
+            <div>
+                <label asp-for="DateOfBirth" class="erp-label"></label>
+                <input asp-for="DateOfBirth" type="date" class="erp-input" data-datepicker placeholder="Select date of birth" />
+                <span asp-validation-for="DateOfBirth" class="text-xs text-red-600"></span>
+            </div>
+            <div>
+                <label asp-for="Gender" class="erp-label"></label>
+                <select asp-for="Gender" class="erp-input">
+                    <option value="">Select gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div>
+                <label asp-for="BloodGroup" class="erp-label"></label>
+                <select asp-for="BloodGroup" class="erp-input">
+                    <option value="">Select blood group</option>
+                    @foreach (var bg in new[] { "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-" })
+                    {
+                        <option value="@bg">@bg</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label asp-for="NationalId" class="erp-label"></label>
+                <input asp-for="NationalId" class="erp-input" placeholder="National ID / NID" />
+            </div>
+            <div>
+                <label asp-for="Phone" class="erp-label"></label>
+                <input asp-for="Phone" class="erp-input" placeholder="+880..." />
+            </div>
+            <div>
+                <label asp-for="Email" class="erp-label"></label>
+                <input asp-for="Email" type="email" class="erp-input" placeholder="email@example.com" />
+                <span asp-validation-for="Email" class="text-xs text-red-600"></span>
+            </div>
+            <div>
+                <label asp-for="MaritalStatus" class="erp-label"></label>
+                <select asp-for="MaritalStatus" class="erp-input">
+                    <option value="">Select status</option>
+                    <option value="Single">Single</option>
+                    <option value="Married">Married</option>
+                    <option value="Divorced">Divorced</option>
+                    <option value="Widowed">Widowed</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="tab === 'office'" x-cloak class="erp-form-section" id="employeeOfficeTab">
+        <div class="mb-4">
+            <h2 class="erp-form-section-title">Office Information</h2>
+            <p class="erp-form-section-desc">Department assignment, designation, and employment status.</p>
+        </div>
+        <div class="erp-form-grid">
+            <div>
+                <label asp-for="DepartmentId" class="erp-label"></label>
+                <select asp-for="DepartmentId" id="DepartmentId" @@change="onDepartmentChange($event)" class="erp-input"
+                        asp-items="@(new SelectList(lookups.Departments, "Id", "Name"))">
+                    <option value="">Select department</option>
+                </select>
+                <span asp-validation-for="DepartmentId" class="text-xs text-red-600"></span>
+            </div>
+            <div>
+                <label asp-for="SectionId" class="erp-label"></label>
+                <select name="SectionId" id="SectionId" x-model="sectionId" @@change="onSectionChange($event)" class="erp-input">
+                    <option value="">Select section</option>
+                    <template x-for="s in sections" :key="s.id">
+                        <option :value="String(s.id)" x-text="s.name"></option>
+                    </template>
+                </select>
+                <span asp-validation-for="SectionId" class="text-xs text-red-600"></span>
+            </div>
+            <div>
+                <label asp-for="LineId" class="erp-label"></label>
+                <select name="LineId" id="LineId" x-model="lineId" class="erp-input">
+                    <option value="">Select line</option>
+                    <template x-for="l in lines" :key="l.id">
+                        <option :value="String(l.id)" x-text="l.name"></option>
+                    </template>
+                </select>
+                <span asp-validation-for="LineId" class="text-xs text-red-600"></span>
+            </div>
+            <div>
+                <label asp-for="DesignationId" class="erp-label"></label>
+                <select name="DesignationId" id="DesignationId" x-model="designationId" class="erp-input">
+                    <option value="">Select designation</option>
+                    <template x-for="d in designations" :key="d.id">
+                        <option :value="String(d.id)" x-text="d.name"></option>
+                    </template>
+                </select>
+                <span asp-validation-for="DesignationId" class="text-xs text-red-600"></span>
+            </div>
+            <div>
+                <label asp-for="JoiningDate" class="erp-label"></label>
+                <input asp-for="JoiningDate" type="date" class="erp-input" data-datepicker placeholder="Select joining date" />
+                <span asp-validation-for="JoiningDate" class="text-xs text-red-600"></span>
+            </div>
+            <div>
+                <label asp-for="ConfirmationDate" class="erp-label"></label>
+                <input asp-for="ConfirmationDate" type="date" class="erp-input" data-datepicker placeholder="Select confirmation date" />
+            </div>
+            <div>
+                <label asp-for="Status" class="erp-label"></label>
+                <select asp-for="Status" asp-items="Html.GetEnumSelectList<ERP.Web.Core.Enums.EntityStatus>()" class="erp-input"></select>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="tab === 'address'" x-cloak class="erp-form-section">
+        <div class="mb-4">
+            <h2 class="erp-form-section-title">Address</h2>
+            <p class="erp-form-section-desc">Link a registered address or enter present and permanent addresses.</p>
+        </div>
+        <div class="erp-form-grid">
+            <div class="sm:col-span-2">
+                <label asp-for="AddressId" class="erp-label"></label>
+                <select asp-for="AddressId" class="erp-input"
+                        asp-items="@(new SelectList(lookups.Addresses, "Id", "Name"))">
+                    <option value="">Select registered address (optional)</option>
+                </select>
+            </div>
+            <div class="sm:col-span-2">
+                <label asp-for="PresentAddress" class="erp-label"></label>
+                <textarea asp-for="PresentAddress" class="erp-textarea" rows="3" placeholder="Current living address"></textarea>
+            </div>
+            <div class="sm:col-span-2">
+                <label asp-for="PermanentAddress" class="erp-label"></label>
+                <textarea asp-for="PermanentAddress" class="erp-textarea" rows="3" placeholder="Permanent / home address"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="tab === 'salary'" x-cloak class="erp-form-section" x-data="salaryForm()">
+        <div class="mb-4">
+            <h2 class="erp-form-section-title">Salary Information</h2>
+            <p class="erp-form-section-desc">Gross salary and salary component breakdown.</p>
+        </div>
+        <div class="erp-form-grid">
+            <div>
+                <label asp-for="GrossSalary" class="erp-label"></label>
+                <input asp-for="GrossSalary" class="erp-input" placeholder="0.00" x-model="gross" />
+                <span asp-validation-for="GrossSalary" class="text-xs text-red-600"></span>
+            </div>
+            <div>
+                <label asp-for="BasicSalary" class="erp-label"></label>
+                <input asp-for="BasicSalary" class="erp-input" placeholder="0.00" x-model="basic" />
+            </div>
+            <div>
+                <label asp-for="HouseRentAllowance" class="erp-label"></label>
+                <input asp-for="HouseRentAllowance" class="erp-input" placeholder="0.00" />
+            </div>
+            <div>
+                <label asp-for="MedicalAllowance" class="erp-label"></label>
+                <input asp-for="MedicalAllowance" class="erp-input" placeholder="0.00" />
+            </div>
+            <div>
+                <label asp-for="TransportAllowance" class="erp-label"></label>
+                <input asp-for="TransportAllowance" class="erp-input" placeholder="0.00" />
+            </div>
+            <div>
+                <label asp-for="OtherAllowance" class="erp-label"></label>
+                <input asp-for="OtherAllowance" class="erp-input" placeholder="0.00" />
+            </div>
+        </div>
+        <p class="mt-3 text-xs text-muted">Tip: Enter gross salary as the total monthly package. Components can be used for payroll breakdown.</p>
+    </div>
+
+    <div x-show="tab === 'account'" x-cloak class="erp-form-section">
+        <div class="mb-4">
+            <h2 class="erp-form-section-title">Account Information</h2>
+            <p class="erp-form-section-desc">Bank account and tax identification for salary disbursement.</p>
+        </div>
+        <div class="erp-form-grid">
+            <div>
+                <label asp-for="BankName" class="erp-label"></label>
+                <input asp-for="BankName" class="erp-input" placeholder="Bank name" />
+            </div>
+            <div>
+                <label asp-for="BankAccountNo" class="erp-label"></label>
+                <input asp-for="BankAccountNo" class="erp-input" placeholder="Account number" />
+            </div>
+            <div>
+                <label asp-for="BankBranch" class="erp-label"></label>
+                <input asp-for="BankBranch" class="erp-input" placeholder="Branch name" />
+            </div>
+            <div>
+                <label asp-for="TaxId" class="erp-label"></label>
+                <input asp-for="TaxId" class="erp-input" placeholder="TIN / Tax ID" />
+            </div>
+        </div>
+    </div>
+
+    <div x-show="tab === 'family'" x-cloak class="erp-form-section">
+        <div class="mb-4">
+            <h2 class="erp-form-section-title">Family Information</h2>
+            <p class="erp-form-section-desc">Family members and emergency contact details.</p>
+        </div>
+        <div class="erp-form-grid">
+            <div>
+                <label asp-for="FatherName" class="erp-label"></label>
+                <input asp-for="FatherName" class="erp-input" placeholder="Father's name" />
+            </div>
+            <div>
+                <label asp-for="MotherName" class="erp-label"></label>
+                <input asp-for="MotherName" class="erp-input" placeholder="Mother's name" />
+            </div>
+            <div>
+                <label asp-for="SpouseName" class="erp-label"></label>
+                <input asp-for="SpouseName" class="erp-input" placeholder="Spouse name" />
+            </div>
+            <div class="sm:col-span-2 border-t border-border pt-4 mt-2">
+                <p class="text-sm font-medium text-foreground mb-3">Emergency Contact</p>
+            </div>
+            <div>
+                <label asp-for="EmergencyContactName" class="erp-label"></label>
+                <input asp-for="EmergencyContactName" class="erp-input" placeholder="Contact person" />
+            </div>
+            <div>
+                <label asp-for="EmergencyContactPhone" class="erp-label"></label>
+                <input asp-for="EmergencyContactPhone" class="erp-input" placeholder="Phone number" />
+            </div>
+            <div>
+                <label asp-for="EmergencyContactRelation" class="erp-label"></label>
+                <input asp-for="EmergencyContactRelation" class="erp-input" placeholder="e.g. Spouse, Parent" />
+            </div>
+        </div>
+    </div>
+
+    <div x-show="tab === 'signature'" x-cloak class="erp-form-section">
+        <div class="mb-4">
+            <h2 class="erp-form-section-title">Signature</h2>
+            <p class="erp-form-section-desc">Draw the employee signature below. Use mouse or touch on mobile.</p>
+        </div>
+        <input type="hidden" asp-for="SignatureData" id="employeeSignatureData" />
+        <div class="rounded-lg border border-border bg-neutral-50 p-4">
+            <canvas id="employeeSignatureCanvas" class="w-full rounded-md border border-border bg-white touch-none" style="height: 200px; cursor: crosshair;"></canvas>
+            <div class="mt-3 flex flex-wrap gap-2">
+                <button type="button" id="employeeSignatureClear" class="erp-btn-secondary text-xs">Clear Signature</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function employeeForm(activeTab, initialDept, initialSection, initialLine, initialDesignation) {
+        const sectionsMeta = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(lookups.Sections.Select(s => new { id = s.Id, name = s.Name, parentId = s.ParentId })));
+        const linesMeta = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(lookups.Lines.Select(l => new { id = l.Id, name = l.Name, parentId = l.ParentId })));
+        const designationsMeta = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(lookups.Designations.Select(d => new { id = d.Id, name = d.Name, parentId = d.ParentId })));
+
+        return {
+            tab: activeTab,
+            departmentId: initialDept ? String(initialDept) : '',
+            sectionId: initialSection ? String(initialSection) : '',
+            lineId: initialLine ? String(initialLine) : '',
+            designationId: initialDesignation ? String(initialDesignation) : '',
+            sections: [],
+            lines: [],
+            designations: [],
+            setTab(value) {
+                this.tab = value;
+                const url = new URL(window.location.href);
+                url.searchParams.set('tab', value);
+                history.replaceState(null, '', url);
+                if (value === 'office') this.prepareOfficeTab();
+            },
+            async init() {
+                this.syncDepartmentSelect();
+                await this.refreshSections(false);
+                await this.refreshLines(false);
+                await this.refreshDesignations(false);
+                if (this.tab === 'office') this.prepareOfficeTab();
+            },
+            syncDepartmentSelect() {
+                const dept = document.getElementById('DepartmentId');
+                if (dept) this.departmentId = dept.value || this.departmentId;
+            },
+            prepareOfficeTab() {
+                this.$nextTick(() => {
+                    if (window.erpInitDatePickers) window.erpInitDatePickers(document.getElementById('employeeOfficeTab'));
+                });
+            },
+            normalizeItems(items) {
+                return (items || []).map(x => ({
+                    id: x.id ?? x.Id,
+                    name: x.name ?? x.Name,
+                    parentId: x.parentId ?? x.ParentId ?? x.departmentId ?? x.DepartmentId ?? x.sectionId ?? x.SectionId
+                }));
+            },
+            filterSections() {
+                if (!this.departmentId) { this.sections = []; return; }
+                this.sections = sectionsMeta.filter(s => String(s.parentId) === String(this.departmentId));
+            },
+            filterLines() {
+                if (!this.sectionId) { this.lines = []; return; }
+                this.lines = linesMeta.filter(l => String(l.parentId) === String(this.sectionId));
+            },
+            filterDesignations() {
+                if (!this.sectionId) { this.designations = []; return; }
+                this.designations = designationsMeta.filter(d => String(d.parentId) === String(this.sectionId));
+            },
+            async refreshSections(resetChildren) {
+                if (!this.departmentId) {
+                    this.sections = [];
+                    if (resetChildren) { this.sectionId = ''; this.lineId = ''; this.lines = []; }
+                    return;
+                }
+                try {
+                    const res = await fetch(`/HR/Lookup/Sections?departmentId=${this.departmentId}`);
+                    if (res.ok) {
+                        this.sections = this.normalizeItems(await res.json());
+                    } else {
+                        this.filterSections();
+                    }
+                } catch {
+                    this.filterSections();
+                }
+                if (resetChildren) {
+                    this.sectionId = '';
+                    this.lineId = '';
+                    this.designationId = '';
+                    this.lines = [];
+                    this.designations = [];
+                } else if (this.sectionId && !this.sections.some(s => String(s.id) === String(this.sectionId))) {
+                    this.sectionId = '';
+                    this.lineId = '';
+                    this.designationId = '';
+                    this.lines = [];
+                    this.designations = [];
+                }
+            },
+            async refreshDesignations(resetChildren) {
+                if (!this.sectionId) {
+                    this.designations = [];
+                    if (resetChildren) this.designationId = '';
+                    return;
+                }
+                try {
+                    const res = await fetch(`/HR/Lookup/Designations?sectionId=${this.sectionId}`);
+                    if (res.ok) {
+                        this.designations = this.normalizeItems(await res.json()).map(d => ({ id: d.id, name: d.title ?? d.name }));
+                    } else {
+                        this.filterDesignations();
+                    }
+                } catch {
+                    this.filterDesignations();
+                }
+                if (resetChildren) {
+                    this.designationId = '';
+                } else if (this.designationId && !this.designations.some(d => String(d.id) === String(this.designationId))) {
+                    this.designationId = '';
+                }
+            },
+            async refreshLines(resetChildren) {
+                if (!this.sectionId) {
+                    this.lines = [];
+                    if (resetChildren) this.lineId = '';
+                    return;
+                }
+                try {
+                    const res = await fetch(`/HR/Lookup/Lines?sectionId=${this.sectionId}`);
+                    if (res.ok) {
+                        this.lines = this.normalizeItems(await res.json());
+                    } else {
+                        this.filterLines();
+                    }
+                } catch {
+                    this.filterLines();
+                }
+                if (resetChildren) {
+                    this.lineId = '';
+                } else if (this.lineId && !this.lines.some(l => String(l.id) === String(this.lineId))) {
+                    this.lineId = '';
+                }
+            },
+            async onDepartmentChange(e) {
+                this.departmentId = e.target.value;
+                await this.refreshSections(true);
+            },
+            async onSectionChange(e) {
+                this.sectionId = e.target.value;
+                await this.refreshLines(true);
+                await this.refreshDesignations(true);
+            }
+        };
+    }
+
+    function salaryForm() {
+        return {
+            gross: '@Model.GrossSalary',
+            basic: '@Model.BasicSalary'
+        };
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const existing = @Html.Raw(signatureJson);
+        const pad = window.erpInitSignaturePad && window.erpInitSignaturePad('employeeSignatureCanvas', 'employeeSignatureData', existing || null);
+        const clearBtn = document.getElementById('employeeSignatureClear');
+        if (clearBtn && pad) clearBtn.addEventListener('click', () => pad.clear());
+    });
+</script>

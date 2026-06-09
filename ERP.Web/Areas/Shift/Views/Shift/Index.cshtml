@@ -1,0 +1,48 @@
+@model IEnumerable<ShiftListItemVm>
+@{
+    ViewData["Title"] = "Shifts";
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Shifts",
+    Subtitle = "Configure work shifts and timings",
+    Actions =
+    [
+        ("Add Shift", Url.Action("Create")!, "primary"),
+        ("Assignments", Url.Action("Assignments")!, "secondary")
+    ]
+})
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+    <table id="shiftsTable" data-datatable class="erp-table display w-full">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Start</th>
+                <th>End</th>
+                <th class="w-12"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="font-medium">@item.Name</td>
+                    <td class="text-muted">@item.StartTime.ToString(@"hh\:mm")</td>
+                    <td class="text-muted">@item.EndTime.ToString(@"hh\:mm")</td>
+                    <td>
+                        @await Html.PartialAsync("~/Views/Shared/Partials/_TableRowActions.cshtml", new List<(string, string?, string?, bool)>
+                        {
+                            ("Edit", Url.Action("Edit", new { id = item.Id }), null, false),
+                            ("Delete", null, $"delete-form-{item.Id}", true)
+                        })
+                        <form id="delete-form-@item.Id" asp-action="Delete" asp-route-id="@item.Id" method="post" class="hidden">@Html.AntiForgeryToken()</form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ConfirmDelete.cshtml")

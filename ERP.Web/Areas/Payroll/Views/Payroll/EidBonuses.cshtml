@@ -1,0 +1,138 @@
+@model IEnumerable<EidBonusVm>
+@{
+    ViewData["Title"] = "Eid Bonus";
+    var year = (int)ViewBag.Year;
+    var bonusType = (int)ViewBag.BonusType;
+    var employees = ViewBag.Employees as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Eid Bonus Management",
+    Subtitle = "Manage festival bonuses for employees"
+})
+
+<div class="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <form method="get" class="flex flex-wrap gap-3 items-end">
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Year</label>
+            <input type="number" name="year" value="@year" class="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Bonus Type</label>
+            <select name="bonusType" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <option value="0">All</option>
+                <option value="1" selected="@(bonusType == 1)">Eid ul Fitr</option>
+                <option value="2" selected="@(bonusType == 2)">Eid ul Adha</option>
+                <option value="3" selected="@(bonusType == 3)">Festival</option>
+            </select>
+        </div>
+        <button type="submit" class="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">Filter</button>
+    </form>
+</div>
+
+<div class="mb-4 grid grid-cols-2 gap-4">
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <h2 class="mb-3 text-sm font-semibold text-slate-900">Bulk Generate</h2>
+        <form asp-action="GenerateEidBonus" method="post" class="flex flex-wrap gap-3 items-end">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="year" value="@year" />
+            <input type="hidden" name="bonusType" value="@(bonusType > 0 ? bonusType : 1)" />
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-600">% of Gross Salary</label>
+                <input type="number" name="percentage" step="0.01" value="100" min="1" max="200" class="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+            </div>
+            <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700" onclick="return confirm('Generate bonuses for all employees?')">Generate All</button>
+        </form>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <h2 class="mb-3 text-sm font-semibold text-slate-900">Add Individual Bonus</h2>
+        <form asp-action="SaveEidBonus" method="post" class="flex flex-wrap gap-3 items-end">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="Id" value="0" />
+            <input type="hidden" name="Year" value="@year" />
+            <input type="hidden" name="BonusStatus" value="1" />
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-600">Employee</label>
+                <select name="EmployeeId" required class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="">Select</option>
+                    @foreach (var emp in employees)
+                    {
+                        <option value="@emp.Id">@emp.FullName (@emp.EmployeeCode)</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-600">Type</label>
+                <select name="BonusType" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="1">Eid ul Fitr</option>
+                    <option value="2">Eid ul Adha</option>
+                    <option value="3">Festival</option>
+                </select>
+            </div>
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-600">Amount</label>
+                <input type="number" name="BonusAmount" step="0.01" required class="w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+            </div>
+            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Add</button>
+        </form>
+    </div>
+</div>
+
+<div class="mb-4 flex gap-4 items-center">
+    <div class="text-sm text-slate-600">
+        Total: <strong>@Model.Count()</strong> employees |
+        Total Amount: <strong>@Model.Sum(m => m.BonusAmount).ToString("N2")</strong>
+    </div>
+    <a href="@Url.Action("ExportEidBonus", new { year, bonusType })" class="ml-auto rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">Export Excel</a>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+<table id="eidBonusTable" data-datatable class="erp-table display w-full">
+    <thead>
+        <tr>
+            <th>Code</th><th>Name</th><th>Department</th>
+            <th>Type</th><th>Year</th><th>Amount</th><th>Status</th><th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.EmployeeCode</td>
+                <td>@item.EmployeeName</td>
+                <td>@item.Department</td>
+                <td>@item.BonusTypeName</td>
+                <td>@item.Year</td>
+                <td class="font-medium">@item.BonusAmount.ToString("N2")</td>
+                <td>
+                    @{
+                        var badgeClass = item.BonusStatus == 3 ? "bg-green-100 text-green-800" :
+                                         item.BonusStatus == 2 ? "bg-blue-100 text-blue-800" : "bg-slate-100 text-slate-700";
+                    }
+                    <span class="rounded-full @badgeClass px-2 py-0.5 text-xs">@item.BonusStatusName</span>
+                </td>
+                <td class="flex gap-2">
+                    @if (item.BonusStatus == 1)
+                    {
+                        <form asp-action="ApproveEidBonus" method="post" class="inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="year" value="@year" />
+                            <input type="hidden" name="bonusType" value="@bonusType" />
+                            <button type="submit" class="text-blue-600 hover:underline text-sm">Approve</button>
+                        </form>
+                    }
+                    <form asp-action="DeleteEidBonus" method="post" class="inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <input type="hidden" name="year" value="@year" />
+                        <input type="hidden" name="bonusType" value="@bonusType" />
+                        <button type="submit" class="text-red-600 hover:underline text-sm" onclick="return confirm('Delete?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")

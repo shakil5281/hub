@@ -1,0 +1,25 @@
+@model AddressVm
+@{
+    ViewData["Title"] = "Edit Address";
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Edit Address",
+    Subtitle = Model.Label,
+    Actions = [("Back to list", Url.Action("Index")!, "secondary")]
+})
+
+<div class="max-w-2xl">
+    <form asp-action="Edit" method="post" class="erp-form-section">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></div>
+        @await Html.PartialAsync("_AddressFormFields")
+        <div class="erp-form-actions mt-6">
+            <button type="submit" class="erp-btn-primary">Update Address</button>
+            <a asp-action="Index" class="erp-btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }

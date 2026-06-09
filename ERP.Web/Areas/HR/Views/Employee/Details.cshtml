@@ -1,0 +1,165 @@
+@model EmployeeDetailsVm
+@using ERP.Web.Core.Enums
+@{
+    ViewData["Title"] = "Employee Details";
+    var activeTab = Context.Request.Query["tab"].FirstOrDefault() ?? "personal";
+    string Fmt(object? value) => value switch
+    {
+        null or "" => "—",
+        DateTime dt => dt.ToString("dd MMM yyyy"),
+        decimal d => d.ToString("N2"),
+        _ => value.ToString()!
+    };
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = Model.FullName,
+    Subtitle = $"{Model.EmployeeCode} · {Model.DesignationTitle}",
+    Actions = Model.Status == EntityStatus.Active
+        ?
+        [
+            ("Initiate Separation", Url.Action("Create", "Separation", new { area = "HR", employeeId = Model.Id })!, "secondary"),
+            ("PDF Profile", Url.Action("ProfilePdf", new { id = Model.Id })!, "secondary"),
+            ("Edit", Url.Action("Edit", new { id = Model.Id })!, "primary"),
+            ("Back to list", Url.Action("Index")!, "secondary")
+        ]
+        :
+        [
+            ("PDF Profile", Url.Action("ProfilePdf", new { id = Model.Id })!, "secondary"),
+            ("Edit", Url.Action("Edit", new { id = Model.Id })!, "primary"),
+            ("Back to list", Url.Action("Index")!, "secondary")
+        ]
+})
+
+<div x-data="{
+    tab: '@activeTab',
+    setTab(value) {
+        this.tab = value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', value);
+        history.replaceState(null, '', url);
+    }
+}">
+    <div class="mb-6 overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+        <div class="erp-filter-tabs">
+            <button type="button" @@click="setTab('personal')"
+                    :class="tab === 'personal' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Personal</button>
+            <button type="button" @@click="setTab('office')"
+                    :class="tab === 'office' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Office</button>
+            <button type="button" @@click="setTab('address')"
+                    :class="tab === 'address' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Address</button>
+            <button type="button" @@click="setTab('salary')"
+                    :class="tab === 'salary' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Salary</button>
+            <button type="button" @@click="setTab('account')"
+                    :class="tab === 'account' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Account</button>
+            <button type="button" @@click="setTab('family')"
+                    :class="tab === 'family' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Family</button>
+            <button type="button" @@click="setTab('signature')"
+                    :class="tab === 'signature' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Signature</button>
+        </div>
+    </div>
+
+    <div x-show="tab === 'personal'" x-cloak class="erp-form-section">
+        <div class="mb-4">
+            <h2 class="erp-form-section-title">Personal Information</h2>
+        </div>
+        <dl class="erp-form-grid">
+            <div><dt class="text-sm text-muted">Employee Code</dt><dd class="font-medium">@Model.EmployeeCode</dd></div>
+            <div><dt class="text-sm text-muted">Punch Number</dt><dd class="font-medium">@Model.PunchNumber</dd></div>
+            <div class="sm:col-span-2"><dt class="text-sm text-muted">Full Name</dt><dd class="font-medium">@Model.FullName</dd></div>
+            <div><dt class="text-sm text-muted">Date of Birth</dt><dd class="font-medium">@Fmt(Model.DateOfBirth)</dd></div>
+            <div><dt class="text-sm text-muted">Gender</dt><dd class="font-medium">@Fmt(Model.Gender)</dd></div>
+            <div><dt class="text-sm text-muted">Blood Group</dt><dd class="font-medium">@Fmt(Model.BloodGroup)</dd></div>
+            <div><dt class="text-sm text-muted">National ID</dt><dd class="font-medium">@Fmt(Model.NationalId)</dd></div>
+            <div><dt class="text-sm text-muted">Phone</dt><dd class="font-medium">@Fmt(Model.Phone)</dd></div>
+            <div><dt class="text-sm text-muted">Email</dt><dd class="font-medium">@Fmt(Model.Email)</dd></div>
+            <div><dt class="text-sm text-muted">Marital Status</dt><dd class="font-medium">@Fmt(Model.MaritalStatus)</dd></div>
+        </dl>
+    </div>
+
+    <div x-show="tab === 'office'" x-cloak class="erp-form-section">
+        <div class="mb-4">
+            <h2 class="erp-form-section-title">Office Information</h2>
+        </div>
+        <dl class="erp-form-grid">
+            <div><dt class="text-sm text-muted">Department</dt><dd class="font-medium">@Model.DepartmentName</dd></div>
+            <div><dt class="text-sm text-muted">Section</dt><dd class="font-medium">@Model.SectionName</dd></div>
+            <div><dt class="text-sm text-muted">Line</dt><dd class="font-medium">@Model.LineName</dd></div>
+            <div><dt class="text-sm text-muted">Designation</dt><dd class="font-medium">@Model.DesignationTitle</dd></div>
+            <div><dt class="text-sm text-muted">Joining Date</dt><dd class="font-medium">@Model.JoiningDate.ToString("dd MMM yyyy")</dd></div>
+            <div><dt class="text-sm text-muted">Confirmation Date</dt><dd class="font-medium">@Fmt(Model.ConfirmationDate)</dd></div>
+            <div><dt class="text-sm text-muted">Status</dt><dd class="font-medium">@Model.Status</dd></div>
+        </dl>
+    </div>
+
+    <div x-show="tab === 'address'" x-cloak class="erp-form-section">
+        <div class="mb-4">
+            <h2 class="erp-form-section-title">Address</h2>
+        </div>
+        <dl class="erp-form-grid">
+            <div class="sm:col-span-2"><dt class="text-sm text-muted">Registered Address</dt><dd class="font-medium">@Fmt(Model.AddressName)</dd></div>
+            <div class="sm:col-span-2"><dt class="text-sm text-muted">Present Address</dt><dd class="font-medium whitespace-pre-line">@Fmt(Model.PresentAddress)</dd></div>
+            <div class="sm:col-span-2"><dt class="text-sm text-muted">Permanent Address</dt><dd class="font-medium whitespace-pre-line">@Fmt(Model.PermanentAddress)</dd></div>
+        </dl>
+    </div>
+
+    <div x-show="tab === 'salary'" x-cloak class="erp-form-section">
+        <div class="mb-4">
+            <h2 class="erp-form-section-title">Salary Information</h2>
+        </div>
+        <dl class="erp-form-grid">
+            <div><dt class="text-sm text-muted">Gross Salary</dt><dd class="font-medium">@Model.GrossSalary.ToString("N2")</dd></div>
+            <div><dt class="text-sm text-muted">Basic Salary</dt><dd class="font-medium">@Model.BasicSalary.ToString("N2")</dd></div>
+            <div><dt class="text-sm text-muted">House Rent Allowance</dt><dd class="font-medium">@Model.HouseRentAllowance.ToString("N2")</dd></div>
+            <div><dt class="text-sm text-muted">Medical Allowance</dt><dd class="font-medium">@Model.MedicalAllowance.ToString("N2")</dd></div>
+            <div><dt class="text-sm text-muted">Transport Allowance</dt><dd class="font-medium">@Model.TransportAllowance.ToString("N2")</dd></div>
+            <div><dt class="text-sm text-muted">Other Allowance</dt><dd class="font-medium">@Model.OtherAllowance.ToString("N2")</dd></div>
+        </dl>
+    </div>
+
+    <div x-show="tab === 'account'" x-cloak class="erp-form-section">
+        <div class="mb-4">
+            <h2 class="erp-form-section-title">Account Information</h2>
+        </div>
+        <dl class="erp-form-grid">
+            <div><dt class="text-sm text-muted">Bank Name</dt><dd class="font-medium">@Fmt(Model.BankName)</dd></div>
+            <div><dt class="text-sm text-muted">Account Number</dt><dd class="font-medium">@Fmt(Model.BankAccountNo)</dd></div>
+            <div><dt class="text-sm text-muted">Branch</dt><dd class="font-medium">@Fmt(Model.BankBranch)</dd></div>
+            <div><dt class="text-sm text-muted">Tax ID / TIN</dt><dd class="font-medium">@Fmt(Model.TaxId)</dd></div>
+        </dl>
+    </div>
+
+    <div x-show="tab === 'family'" x-cloak class="erp-form-section">
+        <div class="mb-4">
+            <h2 class="erp-form-section-title">Family Information</h2>
+        </div>
+        <dl class="erp-form-grid">
+            <div><dt class="text-sm text-muted">Father's Name</dt><dd class="font-medium">@Fmt(Model.FatherName)</dd></div>
+            <div><dt class="text-sm text-muted">Mother's Name</dt><dd class="font-medium">@Fmt(Model.MotherName)</dd></div>
+            <div><dt class="text-sm text-muted">Spouse Name</dt><dd class="font-medium">@Fmt(Model.SpouseName)</dd></div>
+            <div class="sm:col-span-2 border-t border-border pt-4 mt-2">
+                <p class="text-sm font-medium text-foreground mb-3">Emergency Contact</p>
+            </div>
+            <div><dt class="text-sm text-muted">Contact Name</dt><dd class="font-medium">@Fmt(Model.EmergencyContactName)</dd></div>
+            <div><dt class="text-sm text-muted">Contact Phone</dt><dd class="font-medium">@Fmt(Model.EmergencyContactPhone)</dd></div>
+            <div><dt class="text-sm text-muted">Relation</dt><dd class="font-medium">@Fmt(Model.EmergencyContactRelation)</dd></div>
+        </dl>
+    </div>
+
+    <div x-show="tab === 'signature'" x-cloak class="erp-form-section">
+        <div class="mb-4">
+            <h2 class="erp-form-section-title">Signature</h2>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.SignatureData))
+        {
+            <div class="rounded-lg border border-border bg-neutral-50 p-4">
+                <img src="@Model.SignatureData" alt="Employee signature" class="max-h-48 rounded-md border border-border bg-white" />
+            </div>
+        }
+        else
+        {
+            <p class="text-sm text-muted">No signature on file.</p>
+        }
+    </div>
+</div>

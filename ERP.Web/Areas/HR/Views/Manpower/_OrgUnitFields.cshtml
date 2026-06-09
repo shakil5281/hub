@@ -1,0 +1,90 @@
+@using ERP.Web.Areas.HR.ViewModels
+@{
+    var lookups = ViewBag.Lookups as EmployeeFormLookupsVm ?? new EmployeeFormLookupsVm();
+    var prefix = ViewData["FieldPrefix"] as string ?? "";
+    var deptName = prefix + "DepartmentId";
+    var sectionName = prefix + "SectionId";
+    var lineName = prefix + "LineId";
+    var designationName = prefix + "DesignationId";
+}
+
+<div x-data="orgUnitFields()" class="flex flex-wrap items-end gap-3">
+    <div>
+        <label class="mb-1 block text-xs font-medium text-slate-600">Department</label>
+        <select name="@deptName" x-model="departmentId" @@change="onDepartmentChange" required class="rounded-lg border border-slate-300 px-3 py-2 text-sm min-w-[10rem]">
+            <option value="">Select</option>
+            @foreach (var d in lookups.Departments)
+            {
+                <option value="@d.Id">@d.Name</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label class="mb-1 block text-xs font-medium text-slate-600">Section</label>
+        <select name="@sectionName" x-model="sectionId" @@change="onSectionChange" class="rounded-lg border border-slate-300 px-3 py-2 text-sm min-w-[10rem]">
+            <option value="">All</option>
+            <template x-for="s in sections" :key="s.id">
+                <option :value="s.id" x-text="s.name"></option>
+            </template>
+        </select>
+    </div>
+    <div>
+        <label class="mb-1 block text-xs font-medium text-slate-600">Line</label>
+        <select name="@lineName" x-model="lineId" class="rounded-lg border border-slate-300 px-3 py-2 text-sm min-w-[10rem]">
+            <option value="">All</option>
+            <template x-for="l in lines" :key="l.id">
+                <option :value="l.id" x-text="l.name"></option>
+            </template>
+        </select>
+    </div>
+    <div>
+        <label class="mb-1 block text-xs font-medium text-slate-600">Designation</label>
+        <select name="@designationName" x-model="designationId" class="rounded-lg border border-slate-300 px-3 py-2 text-sm min-w-[10rem]">
+            <option value="">All</option>
+            <template x-for="d in designations" :key="d.id">
+                <option :value="d.id" x-text="d.name"></option>
+            </template>
+        </select>
+    </div>
+</div>
+
+<script>
+    function orgUnitFields() {
+        return {
+            departmentId: '',
+            sectionId: '',
+            lineId: '',
+            designationId: '',
+            sections: [],
+            lines: [],
+            designations: [],
+            normalize(items) {
+                return (items || []).map(x => ({
+                    id: String(x.id ?? x.Id),
+                    name: x.name ?? x.Name ?? x.title ?? x.Title
+                }));
+            },
+            async onDepartmentChange() {
+                this.sectionId = '';
+                this.lineId = '';
+                this.designationId = '';
+                this.lines = [];
+                this.designations = [];
+                if (!this.departmentId) { this.sections = []; return; }
+                const res = await fetch(`/HR/Lookup/Sections?departmentId=${this.departmentId}`);
+                this.sections = res.ok ? this.normalize(await res.json()) : [];
+            },
+            async onSectionChange() {
+                this.lineId = '';
+                this.designationId = '';
+                if (!this.sectionId) { this.lines = []; this.designations = []; return; }
+                const [linesRes, desRes] = await Promise.all([
+                    fetch(`/HR/Lookup/Lines?sectionId=${this.sectionId}`),
+                    fetch(`/HR/Lookup/Designations?sectionId=${this.sectionId}`)
+                ]);
+                this.lines = linesRes.ok ? this.normalize(await linesRes.json()) : [];
+                this.designations = desRes.ok ? this.normalize(await desRes.json()) : [];
+            }
+        };
+    }
+</script>

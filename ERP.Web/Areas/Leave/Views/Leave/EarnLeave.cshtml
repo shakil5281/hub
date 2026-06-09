@@ -1,0 +1,66 @@
+@model IEnumerable<EarnLeaveVm>
+@{
+    ViewData["Title"] = "Earn Leave Report";
+    var year = (int)ViewBag.Year;
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Earn Leave Report",
+    Subtitle = "Annual earned leave balance summary",
+    Actions = [("Export Excel", Url.Action("ExportEarnLeave", new { year })!, "secondary")]
+})
+
+<div class="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm flex items-end gap-3">
+    <form method="get" class="flex gap-3 items-end">
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Year</label>
+            <input type="number" name="year" value="@year" class="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <button type="submit" class="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">View</button>
+    </form>
+</div>
+
+<div class="mb-4 grid grid-cols-3 gap-4">
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="text-xs text-slate-500">Total Allocated</div>
+        <div class="mt-1 text-xl font-bold text-slate-900">@Model.Sum(m => m.AllocatedDays)</div>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="text-xs text-slate-500">Total Used</div>
+        <div class="mt-1 text-xl font-bold text-orange-600">@Model.Sum(m => m.UsedDays)</div>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="text-xs text-slate-500">Total Remaining</div>
+        <div class="mt-1 text-xl font-bold text-green-600">@Model.Sum(m => m.RemainingDays)</div>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+<table id="earnLeaveTable" data-datatable class="erp-table display w-full">
+    <thead>
+        <tr>
+            <th>Code</th><th>Name</th><th>Department</th>
+            <th>Year</th><th>Allocated</th><th>Used</th><th>Remaining</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.EmployeeCode</td>
+                <td>@item.EmployeeName</td>
+                <td>@item.Department</td>
+                <td>@item.Year</td>
+                <td>@item.AllocatedDays</td>
+                <td><span class="text-orange-600 font-medium">@item.UsedDays</span></td>
+                <td>
+                    <span class="font-semibold @(item.RemainingDays > 0 ? "text-green-600" : "text-red-600")">
+                        @item.RemainingDays
+                    </span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")

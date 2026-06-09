@@ -1,0 +1,10 @@
+@model ERP.Web.Models.DashboardQuickLinkVm
+<a href="@Model.Href" class="group flex items-start gap-3 rounded-xl border border-border bg-white p-4 shadow-sm transition hover:border-neutral-300 hover:shadow-md">
+    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-neutral-50 text-neutral-600 transition group-hover:bg-neutral-100">
+        @await Html.PartialAsync("Partials/_SidebarIcon", Model.Icon)
+    </div>
+    <div class="min-w-0">
+        <p class="text-sm font-semibold text-foreground">@Model.Title</p>
+        <p class="mt-0.5 text-xs text-muted">@Model.Description</p>
+    </div>
+</a>

@@ -1,0 +1,76 @@
+@model IEnumerable<ShiftAssignmentVm>
+@{
+    ViewData["Title"] = "Shift Assignments";
+    var employees = (IReadOnlyList<EmployeeListItemVm>)ViewBag.Employees!;
+    var shifts = (IReadOnlyList<ShiftListItemVm>)ViewBag.Shifts!;
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Shift Assignments",
+    Subtitle = "Assign employees to shifts",
+    Actions = [("Back to Shifts", Url.Action("Index")!, "secondary")]
+})
+
+<div class="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <h2 class="mb-3 text-sm font-semibold text-slate-900">New Assignment</h2>
+    <form asp-action="SaveAssignment" method="post" class="grid gap-3 md:grid-cols-5 md:items-end">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="Id" value="0" />
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Employee</label>
+            <select name="EmployeeId" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <option value="">Select employee</option>
+                @foreach (var e in employees)
+                {
+                    <option value="@e.Id">@e.FullName (@e.EmployeeCode)</option>
+                }
+            </select>
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Shift</label>
+            <select name="ShiftId" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                @foreach (var s in shifts)
+                {
+                    <option value="@s.Id">@s.Name</option>
+                }
+            </select>
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Effective From</label>
+            <input name="EffectiveFrom" type="date" required value="@DateTime.Today.ToString("yyyy-MM-dd")"
+                   class="erp-input" data-datepicker placeholder="From date" />
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Effective To</label>
+            <input name="EffectiveTo" type="date" class="erp-input" data-datepicker placeholder="To date (optional)" />
+        </div>
+        <div>
+            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Assign</button>
+        </div>
+    </form>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+    <table id="assignmentsTable" data-datatable class="erp-table display w-full">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Shift</th>
+                <th>From</th>
+                <th>To</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.EmployeeName</td>
+                    <td>@item.ShiftName</td>
+                    <td>@item.EffectiveFrom.ToString("dd MMM yyyy")</td>
+                    <td>@(item.EffectiveTo?.ToString("dd MMM yyyy") ?? "—")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")

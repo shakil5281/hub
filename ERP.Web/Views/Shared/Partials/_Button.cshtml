@@ -1,0 +1,10 @@
+@model (string Text, string Href, string Variant)
+@{
+    var css = Model.Variant switch
+    {
+        "danger" => "bg-red-600 hover:bg-red-700 text-white",
+        "outline" => "border border-slate-300 bg-white hover:bg-slate-50 text-slate-700",
+        _ => "bg-blue-600 hover:bg-blue-700 text-white"
+    };
+}
+<a href="@Model.Href" class="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium @css">@Model.Text</a>

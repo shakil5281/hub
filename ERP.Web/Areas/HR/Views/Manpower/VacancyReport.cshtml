@@ -1,0 +1,64 @@
+@model IEnumerable<VacancyReportVm>
+@using ERP.Web.Core.Interfaces.Services
+@{
+    ViewData["Title"] = "Vacancy Report";
+    var year = (int)ViewBag.Year;
+    var month = (int)ViewBag.Month;
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Vacancy Report",
+    Subtitle = "Compare staffing plan vs actual headcount",
+    Actions =
+    [
+        ("Staffing Plan", Url.Action("StaffingPlan", new { year, month })!, "secondary"),
+        ("Export Excel", Url.Action("ExportVacancyReport", new { year, month })!, "secondary")
+    ]
+})
+
+<div class="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <form method="get" class="flex flex-wrap gap-3 items-end">
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Year</label>
+            <input type="number" name="year" value="@year" class="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Month</label>
+            <select name="month" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                @for (var m = 1; m <= 12; m++)
+                {
+                    <option value="@m" selected="@(month == m)">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">View</button>
+    </form>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+<table id="vacancyReportTable" data-datatable class="erp-table display w-full">
+    <thead>
+        <tr>
+            <th>Department</th><th>Section</th><th>Line</th><th>Designation</th>
+            <th>Required</th><th>Actual</th><th>Incoming</th><th>Vacancy</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            var vacancyClass = item.VacancyCount > 0 ? "text-red-600 font-semibold" : "text-emerald-600";
+            <tr>
+                <td>@item.Department</td>
+                <td>@(item.Section == "-" ? "—" : item.Section)</td>
+                <td>@(item.Line == "-" ? "—" : item.Line)</td>
+                <td>@(item.Designation == "-" ? "—" : item.Designation)</td>
+                <td class="font-medium">@item.RequiredCount</td>
+                <td>@item.ActualCount</td>
+                <td>@item.IncomingCount</td>
+                <td class="@vacancyClass">@item.VacancyCount</td>
+            </tr>
+        }
+    </tbody>
+</table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")

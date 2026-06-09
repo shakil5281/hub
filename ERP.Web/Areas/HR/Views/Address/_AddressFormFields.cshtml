@@ -1,0 +1,35 @@
+@model AddressVm
+<input type="hidden" asp-for="Id" />
+<div class="grid gap-4 sm:grid-cols-2">
+    <div>
+        <label asp-for="Label" class="erp-label"></label>
+        <input asp-for="Label" class="erp-input" placeholder="e.g. Head Office" />
+        <span asp-validation-for="Label" class="text-xs text-red-600"></span>
+    </div>
+    <div>
+        <label asp-for="City" class="erp-label"></label>
+        <input asp-for="City" class="erp-input" />
+        <span asp-validation-for="City" class="text-xs text-red-600"></span>
+    </div>
+    <div class="sm:col-span-2">
+        <label asp-for="AddressLine1" class="erp-label"></label>
+        <input asp-for="AddressLine1" class="erp-input" />
+        <span asp-validation-for="AddressLine1" class="text-xs text-red-600"></span>
+    </div>
+    <div class="sm:col-span-2">
+        <label asp-for="AddressLine2" class="erp-label"></label>
+        <input asp-for="AddressLine2" class="erp-input" />
+    </div>
+    <div>
+        <label asp-for="State" class="erp-label"></label>
+        <input asp-for="State" class="erp-input" />
+    </div>
+    <div>
+        <label asp-for="PostalCode" class="erp-label"></label>
+        <input asp-for="PostalCode" class="erp-input" />
+    </div>
+    <div class="flex items-center gap-2 sm:col-span-2">
+        <input asp-for="IsPrimary" type="checkbox" class="rounded border-border" />
+        <label asp-for="IsPrimary" class="text-sm font-medium"></label>
+    </div>
+</div>

@@ -1,0 +1,10 @@
+@model (string Label, string Href, string Icon, bool Active)
+<a href="@Model.Href" @@click="sidebarOpen = false"
+   class="erp-sidebar-link @(Model.Active ? "erp-sidebar-link-active" : "")">
+    @await Html.PartialAsync("Partials/_SidebarIcon", Model.Icon)
+    <span class="truncate">@Model.Label</span>
+    @if (Model.Active)
+    {
+        <span class="ml-auto h-1.5 w-1.5 shrink-0 rounded-full bg-sidebar-active"></span>
+    }
+</a>

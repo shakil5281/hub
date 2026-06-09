@@ -1,0 +1,91 @@
+@* Global search — modal at body level to avoid navbar stacking issues *@
+<div x-show="$store.search.openModal"
+     x-cloak
+     x-transition:enter="transition ease-out duration-150"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-100"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="erp-search-overlay">
+    <div class="erp-search-backdrop" @@click="$store.search.close()"></div>
+    <div class="erp-search-dialog" @@click.stop role="dialog" aria-modal="true" aria-label="Search">
+        <div class="erp-search-input-wrap">
+            <svg class="h-5 w-5 shrink-0 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input type="text"
+                   x-ref="globalSearchInput"
+                   x-model="$store.search.query"
+                   @@input.debounce.250ms="$store.search.runSearch()"
+                   placeholder="Search employees, pages, reports..."
+                   class="erp-search-input"
+                   autocomplete="off"
+                   spellcheck="false" />
+            <kbd class="erp-search-kbd">ESC</kbd>
+        </div>
+
+        <div class="erp-search-body">
+            <div x-show="$store.search.loading" class="erp-search-state">
+                <svg class="h-5 w-5 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+                <span>Searching...</span>
+            </div>
+
+            <div x-show="!$store.search.loading && $store.search.query.trim().length < 2" class="erp-search-hints">
+                <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Quick access</p>
+                <div class="mt-3 grid gap-1">
+                    <template x-for="item in $store.search.quickLinks" :key="item.href">
+                        <a :href="item.href" class="erp-search-item" @@click="$store.search.close()">
+                            <span class="erp-search-item-icon">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                            </span>
+                            <span class="min-w-0 flex-1">
+                                <span class="block truncate text-sm font-medium text-gray-800" x-text="item.title"></span>
+                                <span class="block truncate text-xs text-gray-500" x-text="item.subtitle"></span>
+                            </span>
+                        </a>
+                    </template>
+                </div>
+                <p class="mt-4 text-xs text-gray-400">Type 2+ characters to search · <kbd class="erp-search-kbd-inline">↑↓</kbd> navigate · <kbd class="erp-search-kbd-inline">Enter</kbd> open</p>
+            </div>
+
+            <div x-show="!$store.search.loading && $store.search.query.trim().length >= 2 && $store.search.flatItems.length === 0" class="erp-search-state">
+                <svg class="h-8 w-8 text-gray-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <p class="text-sm text-gray-500">No results for "<span class="font-medium text-gray-700" x-text="$store.search.query"></span>"</p>
+            </div>
+
+            <template x-for="(group, gIdx) in $store.search.groups" :key="group.category">
+                <div class="erp-search-group">
+                    <p class="erp-search-group-title" x-text="group.category"></p>
+                    <template x-for="(item, idx) in group.items" :key="item.href + '-' + idx">
+                        <a :href="item.href"
+                           class="erp-search-item"
+                           :class="{ 'erp-search-item-active': $store.search.activeIndex === $store.search.itemIndex(gIdx, idx) }"
+                           @@mouseenter="$store.search.activeIndex = $store.search.itemIndex(gIdx, idx)"
+                           @@click="$store.search.close()">
+                            <span class="erp-search-item-icon" :class="'erp-search-icon-' + (item.icon || 'file')">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                            </span>
+                            <span class="min-w-0 flex-1">
+                                <span class="block truncate text-sm font-medium text-gray-800" x-text="item.title"></span>
+                                <span class="block truncate text-xs text-gray-500" x-text="item.subtitle"></span>
+                            </span>
+                            <svg class="h-4 w-4 shrink-0 text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+                        </a>
+                    </template>
+                </div>
+            </template>
+        </div>
+
+        <div class="erp-search-footer" x-show="$store.search.flatItems.length > 0">
+            <span x-text="$store.search.flatItems.length + ' result(s)'"></span>
+            <span class="flex items-center gap-2 text-gray-400">
+                <kbd class="erp-search-kbd-inline">↑↓</kbd> navigate
+                <kbd class="erp-search-kbd-inline">↵</kbd> open
+            </span>
+        </div>
+    </div>
+</div>

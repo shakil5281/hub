@@ -1,0 +1,11 @@
+@model (string Name, string Label, string? Type, object? Value)
+@{
+    var inputType = Model.Type ?? "text";
+    var fieldName = Model.Name;
+}
+<div class="mb-4">
+    <label class="mb-1 block text-sm font-medium text-slate-700" for="@fieldName">@Model.Label</label>
+    <input type="@inputType" name="@fieldName" id="@fieldName" value="@Model.Value"
+           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+    <span asp-validation-for="@fieldName" class="text-sm text-red-600"></span>
+</div>

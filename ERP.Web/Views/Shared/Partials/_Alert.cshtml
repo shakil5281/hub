@@ -1,0 +1,15 @@
+@model (string Type, string Message)
+@{
+    var colors = Model.Type switch
+    {
+        "success" => "bg-green-50 text-green-800 border-green-200",
+        "error" => "bg-red-50 text-red-800 border-red-200",
+        _ => "bg-blue-50 text-blue-800 border-blue-200"
+    };
+}
+<div x-data="{ show: true }" x-show="show" x-transition class="mb-4 rounded-lg border px-4 py-3 @colors">
+    <div class="flex items-center justify-between">
+        <span>@Model.Message</span>
+        <button type="button" class="text-sm font-semibold" @@click="show = false">×</button>
+    </div>
+</div>

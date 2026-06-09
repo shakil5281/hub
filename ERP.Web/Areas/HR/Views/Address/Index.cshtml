@@ -1,0 +1,47 @@
+@model IEnumerable<AddressVm>
+@{
+    ViewData["Title"] = "Addresses";
+    var rowCount = Model.Count();
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Addresses",
+    Subtitle = "Employee address locations used when creating or editing employees",
+    Actions = [("Add Address", Url.Action("Create")!, "primary")]
+})
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", rowCount)
+    <table id="addressesTable" data-datatable data-dt-options='{"columnDefs":[{"orderable":false,"targets":[4]}]}' class="erp-table display w-full">
+        <thead>
+            <tr>
+                <th>Label</th>
+                <th>Address</th>
+                <th>City</th>
+                <th>Primary</th>
+                <th class="w-12"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="font-medium">@item.Label</td>
+                    <td>@item.AddressLine1@(string.IsNullOrEmpty(item.AddressLine2) ? "" : $", {item.AddressLine2}")</td>
+                    <td class="text-muted">@item.City</td>
+                    <td>@(item.IsPrimary ? "Yes" : "No")</td>
+                    <td>
+                        @await Html.PartialAsync("~/Views/Shared/Partials/_TableRowActions.cshtml", new List<(string, string?, string?, bool)>
+                        {
+                            ("Edit", Url.Action("Edit", new { id = item.Id }), null, false),
+                            ("Delete", null, $"delete-form-{item.Id}", true)
+                        })
+                        <form id="delete-form-@item.Id" asp-action="Delete" asp-route-id="@item.Id" method="post" class="hidden">@Html.AntiForgeryToken()</form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ConfirmDelete.cshtml")

@@ -1,0 +1,105 @@
+﻿@model ERP.Web.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    var quickLinks = new[]
+    {
+        new ERP.Web.Models.DashboardQuickLinkVm { Title = "Employees", Description = "Manage workforce database", Href = Url.Action("Index", "Employee", new { area = "HR" })!, Icon = "briefcase" },
+        new ERP.Web.Models.DashboardQuickLinkVm { Title = "Attendance Daily", Description = "Review & approve today", Href = Url.Action("Daily", "Attendance", new { area = "Attendance" })!, Icon = "calendar" },
+        new ERP.Web.Models.DashboardQuickLinkVm { Title = "Punch Records", Description = "View & import punches", Href = Url.Action("Index", "Punch", new { area = "Attendance" })!, Icon = "clock" },
+        new ERP.Web.Models.DashboardQuickLinkVm { Title = "Leave Applications", Description = $"{Model.PendingLeaveApplications} pending approval", Href = Url.Action("Applications", "Leave", new { area = "Leave" })!, Icon = "calendar" },
+        new ERP.Web.Models.DashboardQuickLinkVm { Title = "Salary Process", Description = "Generate payroll sheets", Href = Url.Action("Periods", "Payroll", new { area = "Payroll" })!, Icon = "wallet" },
+        new ERP.Web.Models.DashboardQuickLinkVm { Title = "Organogram", Description = "Dept, section, line setup", Href = Url.Action("Index", "Organogram", new { area = "Company" })!, Icon = "building" },
+        new ERP.Web.Models.DashboardQuickLinkVm { Title = "Users & Roles", Description = "Access control", Href = Url.Action("Index", "User", new { area = "Admin" })!, Icon = "users" },
+        new ERP.Web.Models.DashboardQuickLinkVm { Title = "Attendance Report", Description = "Export & analyze data", Href = Url.Action("Report", "Attendance", new { area = "Attendance" })!, Icon = "file" }
+    };
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Dashboard",
+    Subtitle = "Overview of HR, attendance, leave, and payroll metrics",
+    Actions =
+    [
+        ("Add Employee", Url.Action("Create", "Employee", new { area = "HR" })!, "primary"),
+        ("Process Attendance", Url.Action("Process", "Attendance", new { area = "Attendance" })!, "secondary")
+    ]
+})
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <a href="@Url.Action("Index", "Employee", new { area = "HR" })" class="block">
+        @await Html.PartialAsync("Partials/_Card", ("Total Employees", Model.TotalEmployees.ToString(), "Active workforce", "👥", "indigo"))
+    </a>
+    <a href="@Url.Action("Daily", "Attendance", new { area = "Attendance" })" class="block">
+        @await Html.PartialAsync("Partials/_Card", ("Present Today", Model.PresentToday.ToString(), DateTime.Today.ToString("dd MMM yyyy"), "✓", "emerald"))
+    </a>
+    <a href="@Url.Action("Daily", "Attendance", new { area = "Attendance" })" class="block">
+        @await Html.PartialAsync("Partials/_Card", ("Absent Today", Model.AbsentToday.ToString(), "Marked absent", "✗", "amber"))
+    </a>
+    <a href="@Url.Action("Applications", "Leave", new { area = "Leave" })" class="block">
+        @await Html.PartialAsync("Partials/_Card", ("On Leave Today", Model.OnLeaveToday.ToString(), $"{Model.PendingLeaveApplications} pending apps", "🏖", "sky"))
+    </a>
+</div>
+
+@if (Model.PendingLeaveApplications > 0 || Model.PendingAttendanceApprovals > 0)
+{
+    <div class="mt-4 flex flex-wrap gap-3">
+        @if (Model.PendingLeaveApplications > 0)
+        {
+            <a href="@Url.Action("Applications", "Leave", new { area = "Leave" })" class="erp-badge erp-badge-warning">
+                @Model.PendingLeaveApplications leave application(s) awaiting approval
+            </a>
+        }
+        @if (Model.PendingAttendanceApprovals > 0)
+        {
+            <a href="@Url.Action("Daily", "Attendance", new { area = "Attendance" })" class="erp-badge erp-badge-info">
+                @Model.PendingAttendanceApprovals attendance record(s) need approval
+            </a>
+        }
+    </div>
+}
+
+<div class="mt-6">
+    <h2 class="mb-3 text-sm font-semibold text-foreground">Quick Navigation</h2>
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        @foreach (var link in quickLinks)
+        {
+            @await Html.PartialAsync("Partials/_DashboardQuickLink", link)
+        }
+    </div>
+</div>
+
+<div class="erp-card mt-6 p-6">
+    <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-foreground">Monthly Payroll Amount</h2>
+        <a href="@Url.Action("Periods", "Payroll", new { area = "Payroll" })" class="erp-btn-ghost text-xs">View payroll →</a>
+    </div>
+    <canvas id="payrollChart" height="100"></canvas>
+</div>
+
+@section Scripts {
+    <script>
+        const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PayrollChartLabels));
+        const amounts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PayrollChartAmounts));
+
+        new Chart(document.getElementById('payrollChart'), {
+            type: 'bar',
+            data: {
+                labels: labels.length ? labels : ['No data'],
+                datasets: [{
+                    label: 'Net Payable',
+                    data: amounts.length ? amounts : [0],
+                    backgroundColor: 'rgba(23, 23, 23, 0.8)',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f5f5f5' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    </script>
+}

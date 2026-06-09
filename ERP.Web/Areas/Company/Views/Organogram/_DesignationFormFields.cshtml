@@ -1,0 +1,70 @@
+@model DesignationVm
+@{
+    var departments = (IReadOnlyList<DepartmentVm>)(ViewBag.Departments ?? Array.Empty<DepartmentVm>());
+    var sections = (IReadOnlyList<SectionVm>)(ViewBag.Sections ?? Array.Empty<SectionVm>());
+}
+<input type="hidden" asp-for="Id" />
+<div x-data="organogramCascade(@Model.DepartmentId, @Model.SectionId)" x-init="init()" class="grid gap-4 sm:grid-cols-2">
+    <div>
+        <label class="erp-label">Department</label>
+        <select id="OrganogramDepartmentId" x-model="departmentId" @@change="onDepartmentChange()" class="erp-input">
+            <option value="">Select department</option>
+            @foreach (var d in departments)
+            {
+                <option value="@d.Id">@d.Name</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label asp-for="SectionId" class="erp-label">Section</label>
+        <select asp-for="SectionId" id="OrganogramSectionId" x-model="sectionId" class="erp-input">
+            <option value="">Select section</option>
+            <template x-for="s in filteredSections" :key="s.id">
+                <option :value="String(s.id)" x-text="s.name"></option>
+            </template>
+        </select>
+        <span asp-validation-for="SectionId" class="text-xs text-red-600"></span>
+    </div>
+    <div>
+        <label asp-for="Title" class="erp-label"></label>
+        <input asp-for="Title" class="erp-input" />
+        <span asp-validation-for="Title" class="text-xs text-red-600"></span>
+    </div>
+    <div>
+        <label asp-for="Code" class="erp-label"></label>
+        <input asp-for="Code" class="erp-input" />
+        <span asp-validation-for="Code" class="text-xs text-red-600"></span>
+    </div>
+</div>
+
+<script>
+    function organogramCascade(initialDept, initialSection) {
+        const sectionsMeta = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(sections.Select(s => new { id = s.Id, name = s.Name, parentId = s.DepartmentId })));
+        return {
+            departmentId: initialDept ? String(initialDept) : '',
+            sectionId: initialSection ? String(initialSection) : '',
+            filteredSections: [],
+            init() {
+                const dept = document.getElementById('OrganogramDepartmentId');
+                const sec = document.getElementById('OrganogramSectionId');
+                if (dept && dept.value) this.departmentId = dept.value;
+                if (sec && sec.value) this.sectionId = sec.value;
+                this.filterSections();
+            },
+            filterSections() {
+                if (!this.departmentId) {
+                    this.filteredSections = [];
+                    return;
+                }
+                this.filteredSections = sectionsMeta.filter(s => String(s.parentId) === String(this.departmentId));
+                if (this.sectionId && !this.filteredSections.some(s => String(s.id) === String(this.sectionId))) {
+                    this.sectionId = '';
+                }
+            },
+            onDepartmentChange() {
+                this.sectionId = '';
+                this.filterSections();
+            }
+        };
+    }
+</script>

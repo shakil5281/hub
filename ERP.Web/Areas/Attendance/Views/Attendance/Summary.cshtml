@@ -1,0 +1,45 @@
+@using ERP.Web.Core.DTOs
+@model IEnumerable<AttendanceSummaryVm>
+@{
+    ViewData["Title"] = "Attendance Summary";
+    var filter = ViewBag.Filter as AttendanceFilterDto ?? new AttendanceFilterDto();
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Attendance Summary",
+    Subtitle = "Period summary by employee with advanced filters"
+})
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_AttendanceFilter.cshtml", filter)
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+        <table id="summaryTable" data-datatable class="erp-table display w-full">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Employee</th>
+                    <th>Department</th>
+                    <th>Present</th>
+                    <th>Absent</th>
+                    <th>Late Count</th>
+                    <th>OT Hours</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="font-medium">@item.EmployeeCode</td>
+                        <td>@item.EmployeeName</td>
+                        <td><span class="erp-badge erp-badge-neutral">@item.Department</span></td>
+                        <td><span class="erp-badge erp-badge-success">@item.PresentDays</span></td>
+                        <td><span class="erp-badge erp-badge-danger">@item.AbsentDays</span></td>
+                        <td>@item.LateCount</td>
+                        <td>@item.OtHours.ToString("N2")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")
+

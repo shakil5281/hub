@@ -1,0 +1,13 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="rounded-xl border border-red-200 bg-red-50 p-6 text-red-800">
+    <h1 class="text-xl font-semibold">Something went wrong</h1>
+    @if (Model.ShowRequestId)
+    {
+        <p class="mt-2 text-sm">Request ID: <code>@Model.RequestId</code></p>
+    }
+    <a asp-controller="Home" asp-action="Index" class="mt-4 inline-block text-sm font-medium underline">Back to Dashboard</a>
+</div>

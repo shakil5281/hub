@@ -1,0 +1,32 @@
+@model ERP.Web.Models.PageHeaderVm
+
+<div class="erp-page-header">
+    <div>
+        <h1 class="erp-page-title">@Model.Title</h1>
+        @if (!string.IsNullOrEmpty(Model.Subtitle))
+        {
+            <p class="erp-page-subtitle">@Model.Subtitle</p>
+        }
+    </div>
+    @if (Model.Actions.Length > 0)
+    {
+        <div class="flex flex-wrap gap-2">
+            @foreach (var action in Model.Actions)
+            {
+                var css = action.Variant switch
+                {
+                    "primary" => "erp-btn-primary",
+                    "danger" => "erp-btn-danger",
+                    _ => "erp-btn-secondary"
+                };
+                <a href="@action.Href" class="@css">
+                    @if (action.Variant == "primary")
+                    {
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                    }
+                    @action.Text
+                </a>
+            }
+        </div>
+    }
+</div>

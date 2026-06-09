@@ -1,0 +1,12 @@
+@model (string Id, string Title)
+<div id="@Model.Id" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50" x-data="{ open: false }"
+     x-on:open-modal.window="if ($event.detail === '@Model.Id') open = true"
+     x-on:keydown.escape.window="open = false">
+    <div x-show="open" x-transition class="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+        <div class="mb-4 flex items-center justify-between">
+            <h3 class="text-lg font-semibold">@Model.Title</h3>
+            <button type="button" class="text-slate-500 hover:text-slate-700" @@click="open = false">×</button>
+        </div>
+        @RenderBody()
+    </div>
+</div>

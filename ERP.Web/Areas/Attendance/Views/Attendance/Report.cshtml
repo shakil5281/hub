@@ -1,0 +1,54 @@
+@using ERP.Web.Core.DTOs
+@model IEnumerable<AttendanceReportVm>
+@{
+    ViewData["Title"] = "Attendance Report";
+    var filter = ViewBag.Filter as AttendanceFilterDto ?? new AttendanceFilterDto();
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Attendance Report",
+    Subtitle = "Detailed daily attendance with advanced filters",
+    Actions =
+    [
+        ("Export Excel", Url.Action("ExportReport") + Context.Request.QueryString, "secondary"),
+        ("Export PDF", Url.Action("ExportAttendanceReportPdf") + Context.Request.QueryString, "secondary")
+    ]
+})
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_AttendanceFilter.cshtml", filter)
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+        <table id="reportTable" data-datatable class="erp-table display w-full">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Employee</th>
+                    <th>Department</th>
+                    <th>Date</th>
+                    <th>In</th>
+                    <th>Out</th>
+                    <th>Late</th>
+                    <th>OT</th>
+                    <th>Absent</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="font-medium">@item.EmployeeCode</td>
+                        <td>@item.EmployeeName</td>
+                        <td><span class="erp-badge erp-badge-neutral">@item.Department</span></td>
+                        <td class="text-muted">@item.Date.ToString("dd MMM yyyy")</td>
+                        <td>@(item.InTime?.ToString("HH:mm") ?? "—")</td>
+                        <td>@(item.OutTime?.ToString("HH:mm") ?? "—")</td>
+                        <td>@item.LateMinutes</td>
+                        <td>@item.OvertimeMinutes</td>
+                        <td>@(item.IsAbsent ? "Yes" : "No")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")
+

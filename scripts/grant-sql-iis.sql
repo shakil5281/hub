@@ -1,0 +1,2 @@
+-- Use setup-erphub-database.sql instead (this file kept for reference).
+-- Open and run: g:\softwer\hrhub\scripts\setup-erphub-database.sql

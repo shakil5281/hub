@@ -1,0 +1,87 @@
+@model CompanyDetailsVm
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = Model.Name,
+    Subtitle = $"Company code: {Model.Code}",
+    Actions =
+    [
+        ("Edit", Url.Action("Edit", new { id = Model.Id })!, "primary"),
+        ("Back to list", Url.Action("Index")!, "secondary")
+    ]
+})
+
+<div class="grid gap-6 lg:grid-cols-2">
+    <div class="erp-form-section">
+        <h2 class="erp-form-section-title mb-4">General Information</h2>
+        <dl class="space-y-3 text-sm">
+            <div class="flex justify-between gap-4 border-b border-border pb-2">
+                <dt class="text-muted">Company Name</dt>
+                <dd class="font-medium text-foreground">@Model.Name</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-b border-border pb-2">
+                <dt class="text-muted">Code</dt>
+                <dd class="font-medium">@Model.Code</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-b border-border pb-2">
+                <dt class="text-muted">Status</dt>
+                <dd>
+                    @if (Model.Status == EntityStatus.Active)
+                    {
+                        <span class="erp-badge erp-badge-success">✓ @Model.Status</span>
+                    }
+                    else
+                    {
+                        <span class="erp-badge erp-badge-warning">@Model.Status</span>
+                    }
+                </dd>
+            </div>
+            <div class="flex justify-between gap-4 border-b border-border pb-2">
+                <dt class="text-muted">Registration No</dt>
+                <dd>@(Model.RegistrationNo ?? "—")</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-b border-border pb-2">
+                <dt class="text-muted">Tax ID</dt>
+                <dd>@(Model.TaxId ?? "—")</dd>
+            </div>
+        </dl>
+    </div>
+
+    <div class="erp-form-section">
+        <h2 class="erp-form-section-title mb-4">Contact</h2>
+        <dl class="space-y-3 text-sm">
+            <div class="flex justify-between gap-4 border-b border-border pb-2">
+                <dt class="text-muted">Email</dt>
+                <dd>@(Model.Email ?? "—")</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-b border-border pb-2">
+                <dt class="text-muted">Phone</dt>
+                <dd>@(Model.Phone ?? "—")</dd>
+            </div>
+            <div class="border-b border-border pb-2">
+                <dt class="text-muted mb-1">Address</dt>
+                <dd class="whitespace-pre-line">@(string.IsNullOrWhiteSpace(Model.Address) ? "—" : Model.Address)</dd>
+            </div>
+        </dl>
+    </div>
+</div>
+
+<div class="mt-6 erp-form-section">
+    <h2 class="erp-form-section-title mb-4">Audit</h2>
+    <dl class="grid gap-3 text-sm sm:grid-cols-2">
+        <div>
+            <dt class="text-muted">Created</dt>
+            <dd>@Model.CreatedAt.ToString("dd MMM yyyy HH:mm") @(Model.CreatedBy != null ? $"by {Model.CreatedBy}" : "")</dd>
+        </div>
+        @if (Model.UpdatedAt.HasValue)
+        {
+            <div>
+                <dt class="text-muted">Last Updated</dt>
+                <dd>@Model.UpdatedAt.Value.ToString("dd MMM yyyy HH:mm") @(Model.UpdatedBy != null ? $"by {Model.UpdatedBy}" : "")</dd>
+            </div>
+        }
+    </dl>
+</div>

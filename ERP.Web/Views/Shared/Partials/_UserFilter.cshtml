@@ -1,0 +1,64 @@
+@using ERP.Web.Core.DTOs
+@model UserFilterDto
+@{
+    var roles = (IReadOnlyList<string>)(ViewBag.Roles ?? Array.Empty<string>());
+    var action = ViewBag.FilterAction as string ?? Url.Action("Index", "User", new { area = "Admin" })!;
+}
+
+<div class="erp-filter-panel mb-6" x-data="{ tab: 'filters', showSave: false, presetName: '' }" x-init="erpLoadFilterPresets('User', 'preset-list-User')">
+    <div class="erp-filter-tabs">
+        <button type="button" @@click="tab = 'filters'" :class="tab === 'filters' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Filters</button>
+        <button type="button" @@click="tab = 'presets'; erpLoadFilterPresets('User', 'preset-list-User')" :class="tab === 'presets' ? 'erp-filter-tab erp-filter-tab-active' : 'erp-filter-tab'">Saved Presets</button>
+    </div>
+    <div class="erp-filter-header">
+        <div>
+            <p class="text-sm font-semibold">User Database Filters</p>
+            <p class="text-xs text-muted">Search users by name, email, role, and account status</p>
+        </div>
+        <div class="flex gap-2">
+            <button type="button" @@click="showSave = !showSave" class="erp-btn-secondary text-xs">Save Preset</button>
+            <a href="@action" class="erp-btn-ghost text-xs">Reset all</a>
+        </div>
+    </div>
+    <div x-show="showSave" x-cloak class="border-b border-border bg-neutral-50 px-4 py-3">
+        <div class="flex flex-wrap items-end gap-3">
+            <div class="min-w-[200px] flex-1">
+                <label class="erp-label-muted">Preset name</label>
+                <input type="text" x-model="presetName" class="erp-input" placeholder="Active admins" />
+            </div>
+            <button type="button" class="erp-btn-primary" @@click="erpSaveFilterPreset('User', presetName, document.getElementById('userFilterForm'))">Save</button>
+        </div>
+    </div>
+    <div class="erp-filter-body" x-show="tab === 'filters'">
+        <form id="userFilterForm" method="get" action="@action" class="erp-filter-grid">
+            <div class="sm:col-span-2 lg:col-span-2">
+                <label class="erp-label-muted">Search</label>
+                <input type="text" name="Search" value="@Model.Search" placeholder="Name or email…" class="erp-input" />
+            </div>
+            <div>
+                <label class="erp-label-muted">Role</label>
+                <select name="RoleName" class="erp-input">
+                    <option value="">All roles</option>
+                    @foreach (var role in roles)
+                    {
+                        <option value="@role" selected="@(Model.RoleName == role)">@role</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="erp-label-muted">Status</label>
+                <select name="IsActive" class="erp-input">
+                    <option value="">All statuses</option>
+                    <option value="true" selected="@(Model.IsActive == true)">Active</option>
+                    <option value="false" selected="@(Model.IsActive == false)">Inactive</option>
+                </select>
+            </div>
+            <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-4">
+                <button type="submit" class="erp-btn-primary">Apply filters</button>
+            </div>
+        </form>
+    </div>
+    <div class="erp-filter-body" x-show="tab === 'presets'" x-cloak>
+        <div id="preset-list-User" class="text-sm text-muted">No saved presets yet.</div>
+    </div>
+</div>

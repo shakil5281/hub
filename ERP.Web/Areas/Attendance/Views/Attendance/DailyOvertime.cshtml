@@ -1,0 +1,72 @@
+@model IEnumerable<DailyOvertimeVm>
+@{
+    ViewData["Title"] = "Daily Overtime";
+    var date = (DateTime)ViewBag.Date;
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Daily Overtime",
+    Subtitle = "Per-employee overtime for a specific date"
+})
+
+<div class="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm flex flex-wrap gap-3 items-end justify-between">
+    <form method="get" class="flex gap-3 items-end">
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Date</label>
+            <input type="date" name="date" value="@date.ToString("yyyy-MM-dd")" class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <button type="submit" class="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">View</button>
+    </form>
+    <a href="@Url.Action("ExportDailyOvertime", new { from = date.ToString("yyyy-MM-dd"), to = date.ToString("yyyy-MM-dd") })" class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">Export Excel</a>
+</div>
+
+<div class="mb-4 grid grid-cols-3 gap-4">
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="text-xs text-slate-500">Employees with OT</div>
+        <div class="mt-1 text-xl font-bold text-slate-900">@Model.Count()</div>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="text-xs text-slate-500">Total OT Hours</div>
+        <div class="mt-1 text-xl font-bold text-blue-600">@Model.Sum(m => m.OvertimeHours).ToString("N2")</div>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="text-xs text-slate-500">Total OT Amount</div>
+        <div class="mt-1 text-xl font-bold text-green-600">@Model.Sum(m => m.OvertimeAmount).ToString("N2")</div>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+<table id="dailyOtTable" data-datatable class="erp-table display w-full">
+    <thead>
+        <tr>
+            <th>Code</th><th>Name</th><th>Department</th>
+            <th>In Time</th><th>Out Time</th>
+            <th>OT Minutes</th><th>OT Hours</th><th>OT Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.EmployeeCode</td>
+                <td>@item.EmployeeName</td>
+                <td>@item.Department</td>
+                <td>@(item.InTime?.ToString("HH:mm") ?? "-")</td>
+                <td>@(item.OutTime?.ToString("HH:mm") ?? "-")</td>
+                <td>@item.OvertimeMinutes</td>
+                <td class="text-blue-600 font-medium">@item.OvertimeHours.ToString("N2")</td>
+                <td class="text-green-600 font-medium">@item.OvertimeAmount.ToString("N2")</td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr class="font-semibold bg-slate-50">
+            <td colspan="5" class="px-4 py-2 text-right">Total:</td>
+            <td class="px-4 py-2">@Model.Sum(m => m.OvertimeMinutes)</td>
+            <td class="px-4 py-2 text-blue-600">@Model.Sum(m => m.OvertimeHours).ToString("N2")</td>
+            <td class="px-4 py-2 text-green-600">@Model.Sum(m => m.OvertimeAmount).ToString("N2")</td>
+        </tr>
+    </tfoot>
+</table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")

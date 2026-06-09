@@ -1,0 +1,14 @@
+@model DepartmentVm
+<input type="hidden" asp-for="Id" />
+<div class="grid gap-4 sm:grid-cols-2">
+    <div>
+        <label asp-for="Name" class="erp-label"></label>
+        <input asp-for="Name" class="erp-input" />
+        <span asp-validation-for="Name" class="text-xs text-red-600"></span>
+    </div>
+    <div>
+        <label asp-for="Code" class="erp-label"></label>
+        <input asp-for="Code" class="erp-input" />
+        <span asp-validation-for="Code" class="text-xs text-red-600"></span>
+    </div>
+</div>

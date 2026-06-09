@@ -1,0 +1,39 @@
+@model CompanyEditVm
+
+<div class="grid gap-4 sm:grid-cols-2">
+    <div>
+        <label asp-for="Name" class="erp-label"></label>
+        <input asp-for="Name" class="erp-input" />
+        <span asp-validation-for="Name" class="text-xs text-red-600"></span>
+    </div>
+    <div>
+        <label asp-for="Code" class="erp-label"></label>
+        <input asp-for="Code" class="erp-input" />
+        <span asp-validation-for="Code" class="text-xs text-red-600"></span>
+    </div>
+    <div>
+        <label asp-for="Email" class="erp-label"></label>
+        <input asp-for="Email" class="erp-input" type="email" />
+        <span asp-validation-for="Email" class="text-xs text-red-600"></span>
+    </div>
+    <div>
+        <label asp-for="Phone" class="erp-label"></label>
+        <input asp-for="Phone" class="erp-input" />
+    </div>
+    <div>
+        <label asp-for="RegistrationNo" class="erp-label"></label>
+        <input asp-for="RegistrationNo" class="erp-input" />
+    </div>
+    <div>
+        <label asp-for="TaxId" class="erp-label"></label>
+        <input asp-for="TaxId" class="erp-input" />
+    </div>
+    <div class="sm:col-span-2">
+        <label asp-for="Address" class="erp-label"></label>
+        <textarea asp-for="Address" class="erp-input" rows="3"></textarea>
+    </div>
+    <div>
+        <label asp-for="Status" class="erp-label"></label>
+        <select asp-for="Status" asp-items="Html.GetEnumSelectList<EntityStatus>()" class="erp-input"></select>
+    </div>
+</div>

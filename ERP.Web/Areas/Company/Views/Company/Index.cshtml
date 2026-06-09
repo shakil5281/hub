@@ -1,0 +1,70 @@
+@model IEnumerable<CompanyListItemVm>
+@{
+    ViewData["Title"] = "Company Information";
+    var rowCount = Model.Count();
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Company Information",
+    Subtitle = "Manage company records, registration details, and contact information",
+    Actions =
+    [
+        ("Add Company", Url.Action("Create")!, "primary")
+    ]
+})
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", rowCount)
+        <table id="companiesTable" data-datatable data-dt-options='{"columnDefs":[{"orderable":false,"targets":[7]}]}' class="erp-table display w-full">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Company Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Registration No</th>
+                    <th>Tax ID</th>
+                    <th>Status</th>
+                    <th class="w-12"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="font-medium">@item.Code</td>
+                        <td>
+                            <div class="font-medium text-foreground">@item.Name</div>
+                        </td>
+                        <td class="text-muted">@(item.Email ?? "—")</td>
+                        <td class="text-muted">@(item.Phone ?? "—")</td>
+                        <td class="text-muted">@(item.RegistrationNo ?? "—")</td>
+                        <td class="text-muted">@(item.TaxId ?? "—")</td>
+                        <td>
+                            @if (item.Status == EntityStatus.Active)
+                            {
+                                <span class="erp-badge erp-badge-success">✓ @item.Status</span>
+                            }
+                            else
+                            {
+                                <span class="erp-badge erp-badge-warning">@item.Status</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="relative" x-data="{ open: false }">
+                                <button type="button" @@click="open = !open" class="erp-btn-ghost h-8 w-8 p-0">⋯</button>
+                                <div x-show="open" @@click.outside="open = false" x-cloak class="absolute right-0 z-10 mt-1 w-40 rounded-md border border-border bg-white py-1 shadow-lg">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="block px-3 py-1.5 text-sm hover:bg-accent">View</a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="block px-3 py-1.5 text-sm hover:bg-accent">Edit</a>
+                                    <button type="button" class="block w-full px-3 py-1.5 text-left text-sm text-red-600 hover:bg-accent" @@click="$dispatch('confirm-delete', 'delete-form-@item.Id'); open = false">Delete</button>
+                                </div>
+                            </div>
+                            <form id="delete-form-@item.Id" asp-action="Delete" asp-route-id="@item.Id" method="post" class="hidden">@Html.AntiForgeryToken()</form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ConfirmDelete.cshtml")

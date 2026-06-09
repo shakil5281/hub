@@ -1,0 +1,14 @@
+@model ERP.Web.Models.SidebarGroupVm
+<div x-data="{ open: @Model.OpenByDefault.ToString().ToLower() }" class="mb-1">
+    <button type="button" @@click="open = !open"
+            class="erp-sidebar-group-btn">
+        <span>@Model.Title</span>
+        <svg class="h-3.5 w-3.5 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div x-show="open" x-transition class="mt-0.5 space-y-0.5">
+        @foreach (var link in Model.Links)
+        {
+            @await Html.PartialAsync("Partials/_SidebarLink", (link.Label, link.Href, link.Icon, link.IsActive))
+        }
+    </div>
+</div>

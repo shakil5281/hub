@@ -1,0 +1,47 @@
+@model IEnumerable<PayrollSummaryVm>
+@{
+    ViewData["Title"] = "Payroll Summary";
+    var sheetId = ViewContext.RouteData.Values["sheetId"];
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Payroll Summary",
+    Subtitle = "Department-wise payroll summary",
+    Actions =
+    [
+        ("Export Excel", Url.Action("ExportSummary", new { sheetId })!, "secondary"),
+        ("Export PDF", Url.Action("ExportPayrollSheetPdf", new { sheetId })!, "secondary"),
+        ("Back to Sheet", Url.Action("Sheet", new { id = sheetId })!, "secondary")
+    ]
+})
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+    <table id="payrollSummaryTable" data-datatable class="erp-table display w-full">
+        <thead>
+            <tr>
+                <th>Department</th>
+                <th>Employees</th>
+                <th>Total Gross</th>
+                <th>Total Net</th>
+                <th>Total OT</th>
+                <th>Night Bill</th>
+                <th>Holiday Bill</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Department</td>
+                    <td>@item.EmployeeCount</td>
+                    <td>@item.TotalGross.ToString("N2")</td>
+                    <td>@item.TotalNet.ToString("N2")</td>
+                    <td>@item.TotalOt.ToString("N2")</td>
+                    <td>@item.TotalNightBill.ToString("N2")</td>
+                    <td>@item.TotalHolidayBill.ToString("N2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")

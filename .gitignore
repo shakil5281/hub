@@ -1,0 +1,61 @@
+# .NET / ASP.NET Core
+**/bin/
+**/obj/
+**/.tools/
+**/publish/
+**/publish-staging/
+**/TestResults/
+**/coverage/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.ncrunch*
+*.DotSettings.user
+
+# NuGet
+*.nupkg
+*.snupkg
+**/packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Node / Tailwind
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE
+**/.vs/
+**/.idea/
+*.swp
+*~
+
+# User-specific / local config overrides
+**/appsettings.*.local.json
+**/secrets.json
+.env
+.env.*
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+**/logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Exports/uploads (keep folders, ignore contents)
+ERP.Web/wwwroot/uploads/*
+!ERP.Web/wwwroot/uploads/.gitkeep
+ERP.Web/wwwroot/exports/*
+!ERP.Web/wwwroot/exports/.gitkeep

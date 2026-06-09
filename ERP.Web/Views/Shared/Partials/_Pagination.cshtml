@@ -1,0 +1,23 @@
+@model (int CurrentPage, int TotalPages, string Action, string? Area)
+@{
+    var area = Model.Area;
+}
+@if (Model.TotalPages > 1)
+{
+    <nav class="mt-4 flex justify-center gap-2">
+        @for (var i = 1; i <= Model.TotalPages; i++)
+        {
+            var active = i == Model.CurrentPage ? "bg-blue-600 text-white" : "bg-white text-slate-700 hover:bg-slate-50";
+            if (string.IsNullOrEmpty(area))
+            {
+                <a asp-action="@Model.Action" asp-route-page="@i"
+                   class="rounded-lg border border-slate-200 px-3 py-1 text-sm @active">@i</a>
+            }
+            else
+            {
+                <a asp-area="@area" asp-action="@Model.Action" asp-route-page="@i"
+                   class="rounded-lg border border-slate-200 px-3 py-1 text-sm @active">@i</a>
+            }
+        }
+    </nav>
+}

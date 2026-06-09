@@ -1,0 +1,30 @@
+@model EmployeeCreateVm
+@{
+    ViewData["Title"] = "Create Employee";
+    ViewBag.ActiveTab = Context.Request.Query["tab"].FirstOrDefault() ?? "personal";
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Create Employee",
+    Subtitle = "Add a new employee with complete profile information",
+    Actions = [("Back to list", Url.Action("Index")!, "secondary")]
+})
+
+<div class="max-w-5xl">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></div>
+
+        @await Html.PartialAsync("_EmployeeFormFields")
+
+        <div class="erp-form-actions mt-6">
+            <button type="submit" class="erp-btn-primary">Save Employee</button>
+            <a asp-action="Index" class="erp-btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

@@ -1,0 +1,16 @@
+@model (string Title, string Value, string? Subtitle, string IconClass, string Color)
+<div class="erp-stat-card">
+    <div class="flex items-start justify-between gap-3">
+        <div>
+            <p class="text-sm font-medium text-muted">@Model.Title</p>
+            <p class="mt-2 text-3xl font-semibold tracking-tight">@Model.Value</p>
+            @if (!string.IsNullOrEmpty(Model.Subtitle))
+            {
+                <p class="mt-1 text-xs text-muted">@Model.Subtitle</p>
+            }
+        </div>
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-neutral-50 text-lg">
+            @Model.IconClass
+        </div>
+    </div>
+</div>

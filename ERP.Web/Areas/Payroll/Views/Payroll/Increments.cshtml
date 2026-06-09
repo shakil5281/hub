@@ -1,0 +1,70 @@
+@model IEnumerable<SalaryIncrementVm>
+@{
+    ViewData["Title"] = "Salary Increments";
+    var employees = (IReadOnlyList<EmployeeListItemVm>)ViewBag.Employees!;
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Salary Increments",
+    Subtitle = "Record salary increment history"
+})
+
+<div class="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <h2 class="mb-3 text-sm font-semibold text-slate-900">New Increment</h2>
+    <form asp-action="SaveIncrement" method="post" class="grid gap-3 md:grid-cols-5 md:items-end">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="Id" value="0" />
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Employee</label>
+            <select name="EmployeeId" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                @foreach (var e in employees)
+                {
+                    <option value="@e.Id">@e.FullName</option>
+                }
+            </select>
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Previous Gross</label>
+            <input name="PreviousGross" type="number" step="0.01" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">New Gross</label>
+            <input name="NewGross" type="number" step="0.01" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Effective Date</label>
+            <input name="EffectiveDate" type="date" required value="@DateTime.Today.ToString("yyyy-MM-dd")"
+                   class="erp-input" data-datepicker placeholder="Effective date" />
+        </div>
+        <div>
+            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Save</button>
+        </div>
+    </form>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+    <table id="incrementsTable" data-datatable class="erp-table display w-full">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Previous</th>
+                <th>New</th>
+                <th>Effective Date</th>
+                <th>Reason</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.EmployeeName</td>
+                    <td>@item.PreviousGross.ToString("N2")</td>
+                    <td>@item.NewGross.ToString("N2")</td>
+                    <td>@item.EffectiveDate.ToString("dd MMM yyyy")</td>
+                    <td>@(item.Reason ?? "—")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")

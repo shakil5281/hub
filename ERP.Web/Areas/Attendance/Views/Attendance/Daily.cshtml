@@ -1,0 +1,70 @@
+@using ERP.Web.Core.DTOs
+@model IEnumerable<DailyAttendanceVm>
+@{
+    ViewData["Title"] = "Daily Attendance";
+    var filter = ViewBag.Filter as AttendanceFilterDto ?? new AttendanceFilterDto();
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Daily Attendance",
+    Subtitle = "Review and approve daily attendance records",
+    Actions = [("Process", Url.Action("Process")!, "secondary")]
+})
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_AttendanceFilter.cshtml", filter)
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+        <table id="dailyTable" data-datatable data-dt-options='{"columnDefs":[{"orderable":false,"targets":[0,9]}]}' class="erp-table display w-full">
+            <thead>
+                <tr>
+                    <th class="w-10"><input type="checkbox" class="rounded border-border" /></th>
+                    <th>Employee</th>
+                    <th>Date</th>
+                    <th>In</th>
+                    <th>Out</th>
+                    <th>Late</th>
+                    <th>OT</th>
+                    <th>Status</th>
+                    <th>Approved</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><input type="checkbox" class="rounded border-border" /></td>
+                        <td class="font-medium">@item.EmployeeName</td>
+                        <td class="text-muted">@item.AttendanceDate.ToString("dd MMM yyyy")</td>
+                        <td>@(item.InTime?.ToString("HH:mm") ?? "—")</td>
+                        <td>@(item.OutTime?.ToString("HH:mm") ?? "—")</td>
+                        <td>@item.LateMinutes min</td>
+                        <td>@item.OvertimeMinutes min</td>
+                        <td>
+                            @if (item.IsAbsent)
+                            { <span class="erp-badge erp-badge-danger">Absent</span> }
+                            else
+                            { <span class="erp-badge erp-badge-success">Present</span> }
+                        </td>
+                        <td>
+                            @if (item.IsApproved)
+                            { <span class="erp-badge erp-badge-success">✓ Done</span> }
+                            else
+                            { <span class="erp-badge erp-badge-warning">Pending</span> }
+                        </td>
+                        <td>
+                            @if (!item.IsApproved)
+                            {
+                                <form asp-action="Approve" asp-route-id="@item.Id" method="post" class="inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="erp-btn-secondary text-xs">Approve</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")
+

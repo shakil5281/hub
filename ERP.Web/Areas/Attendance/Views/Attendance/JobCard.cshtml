@@ -1,0 +1,117 @@
+@model IEnumerable<JobCardVm>
+@{
+    ViewData["Title"] = "Job Card";
+    var from = (DateTime)ViewBag.From;
+    var to = (DateTime)ViewBag.To;
+    var lineId = ViewBag.LineId as int?;
+    var lines = ViewBag.Lines as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Job Card",
+    Subtitle = "Daily task and productivity tracking",
+    Actions = [("Export PDF", Url.Action("ExportJobCardPdf", new { date = from.ToString("yyyy-MM-dd") })!, "secondary")]
+})
+
+<div class="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <form method="get" class="flex flex-wrap gap-3 items-end">
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">From</label>
+            <input type="date" name="from" value="@from.ToString("yyyy-MM-dd")" class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">To</label>
+            <input type="date" name="to" value="@to.ToString("yyyy-MM-dd")" class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Line</label>
+            <select name="lineId" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <option value="">All Lines</option>
+                @foreach (var line in lines)
+                {
+                    <option value="@line.Id" selected="@(lineId == line.Id)">@line.Name</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">Filter</button>
+    </form>
+</div>
+
+<div class="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <h2 class="mb-3 text-sm font-semibold text-slate-900">Add Job Card Entry</h2>
+    <form asp-action="SaveJobCard" method="post" class="flex flex-wrap items-end gap-3">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="Id" value="0" />
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Employee ID</label>
+            <input type="number" name="EmployeeId" required class="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="Emp ID" />
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Line</label>
+            <select name="LineId" required class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <option value="">Select Line</option>
+                @foreach (var line in lines)
+                {
+                    <option value="@line.Id">@line.Name</option>
+                }
+            </select>
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Date</label>
+            <input type="date" name="WorkDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" required class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Task</label>
+            <input name="TaskDescription" class="rounded-lg border border-slate-300 px-3 py-2 text-sm w-32" />
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Target Qty</label>
+            <input type="number" name="TargetQty" step="0.1" value="0" class="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Achieved Qty</label>
+            <input type="number" name="AchievedQty" step="0.1" value="0" class="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Add</button>
+    </form>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+<table id="jobCardTable" data-datatable class="erp-table display w-full">
+    <thead>
+        <tr>
+            <th>Date</th><th>Code</th><th>Name</th><th>Department</th>
+            <th>Line</th><th>Task</th><th>Target</th><th>Achieved</th><th>Efficiency</th><th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.WorkDate.ToString("dd MMM yyyy")</td>
+                <td>@item.EmployeeCode</td>
+                <td>@item.EmployeeName</td>
+                <td>@item.Department</td>
+                <td>@item.LineName</td>
+                <td>@item.TaskDescription</td>
+                <td>@item.TargetQty.ToString("N1")</td>
+                <td>@item.AchievedQty.ToString("N1")</td>
+                <td>
+                    @{
+                        var effColor = item.Efficiency >= 100 ? "text-green-600" : item.Efficiency >= 80 ? "text-yellow-600" : "text-red-600";
+                    }
+                    <span class="font-semibold @effColor">@item.Efficiency%</span>
+                </td>
+                <td>
+                    <form asp-action="DeleteJobCard" method="post" class="inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button type="submit" class="text-red-600 hover:underline text-sm" onclick="return confirm('Delete?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")

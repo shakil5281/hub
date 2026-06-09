@@ -1,0 +1,54 @@
+@model IEnumerable<PayrollDetailVm>
+@{
+    ViewData["Title"] = "Payroll Sheet";
+    var sheetId = ViewContext.RouteData.Values["id"];
+}
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_PageHeader.cshtml", new ERP.Web.Models.PageHeaderVm
+{
+    Title = "Payroll Sheet",
+    Subtitle = "Monthly payroll details",
+    Actions =
+    [
+        ("Summary", Url.Action("Summary", new { sheetId })!, "secondary"),
+        ("Export Excel", Url.Action("ExportSheet", new { sheetId })!, "secondary"),
+        ("Export PDF", Url.Action("ExportPayrollSheetPdf", new { sheetId })!, "secondary"),
+        ("Back to Periods", Url.Action("Periods")!, "secondary")
+    ]
+})
+
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellStart.cshtml", Model.Count())
+    <table id="sheetTable" data-datatable class="erp-table display w-full">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Employee</th>
+                <th>Gross</th>
+                <th>Basic</th>
+                <th>Absent Ded.</th>
+                <th>OT</th>
+                <th>Advance Ded.</th>
+                <th>Net Pay</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.EmployeeCode</td>
+                    <td>@item.EmployeeName</td>
+                    <td>@item.GrossSalary.ToString("N2")</td>
+                    <td>@item.BasicSalary.ToString("N2")</td>
+                    <td>@item.AbsentDeduction.ToString("N2")</td>
+                    <td>@item.OvertimeAmount.ToString("N2")</td>
+                    <td>@item.AdvanceDeduction.ToString("N2")</td>
+                    <td class="font-medium">@item.NetPayableSalary.ToString("N2")</td>
+                    <td>
+                        <a asp-action="Payslip" asp-route-detailId="@item.Id" class="text-blue-600 hover:underline">Payslip</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+@await Html.PartialAsync("~/Views/Shared/Partials/_ErpTableShellEnd.cshtml")
