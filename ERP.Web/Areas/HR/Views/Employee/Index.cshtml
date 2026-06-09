@@ -34,7 +34,7 @@
                     <th>Joined</th>
                     <th>Salary</th>
                     <th>Status</th>
-                    <th class="w-12"></th>
+                    <th class="w-44 text-right">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -63,13 +63,10 @@
                             }
                         </td>
                         <td>
-                            <div class="relative" x-data="{ open: false }">
-                                <button type="button" @@click="open = !open" class="erp-btn-ghost h-8 w-8 p-0">⋯</button>
-                                <div x-show="open" @@click.outside="open = false" x-cloak class="absolute right-0 z-10 mt-1 w-36 rounded-md border border-border bg-white py-1 shadow-lg">
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="block px-3 py-1.5 text-sm hover:bg-accent">View</a>
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="block px-3 py-1.5 text-sm hover:bg-accent">Edit</a>
-                                    <button type="button" class="block w-full px-3 py-1.5 text-left text-sm text-red-600 hover:bg-accent" @@click="$dispatch('confirm-delete', 'delete-form-@item.Id'); open = false">Delete</button>
-                                </div>
+                            <div class="erp-row-actions">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="erp-row-action">View</a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="erp-row-action">Edit</a>
+                                <button type="button" class="erp-row-action erp-row-action-danger" @@click="$dispatch('confirm-delete', 'delete-form-@item.Id')">Delete</button>
                             </div>
                             <form id="delete-form-@item.Id" asp-action="Delete" asp-route-id="@item.Id" method="post" class="hidden">@Html.AntiForgeryToken()</form>
                         </td>

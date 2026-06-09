@@ -21,7 +21,10 @@ public class Employee : BaseEntity
     public int LineId { get; set; }
     public int DesignationId { get; set; }
     public DateTime JoiningDate { get; set; }
+    public DateTime? ResignDate { get; set; }
     public DateTime? ConfirmationDate { get; set; }
+    public string? EmployeeCategory { get; set; }
+    public string? EmploymentType { get; set; }
 
     public int? AddressId { get; set; }
     public string? PresentAddress { get; set; }
@@ -62,4 +65,9 @@ public class Employee : BaseEntity
     public ICollection<PayrollDetail> PayrollDetails { get; set; } = new List<PayrollDetail>();
     public ICollection<AdvanceSalary> AdvanceSalaries { get; set; } = new List<AdvanceSalary>();
     public ICollection<SalaryIncrement> SalaryIncrements { get; set; } = new List<SalaryIncrement>();
+    public ICollection<EmployeeAddress> EmployeeAddresses { get; set; } = new List<EmployeeAddress>();
+    public ICollection<EmployeeJobHistory> JobHistories { get; set; } = new List<EmployeeJobHistory>();
+    public ICollection<EmployeeSalaryStructure> SalaryStructures { get; set; } = new List<EmployeeSalaryStructure>();
+    public ICollection<EmployeeDeviceMapping> DeviceMappings { get; set; } = new List<EmployeeDeviceMapping>();
+    public ICollection<EmployeeWeeklyOff> WeeklyOffs { get; set; } = new List<EmployeeWeeklyOff>();
 }

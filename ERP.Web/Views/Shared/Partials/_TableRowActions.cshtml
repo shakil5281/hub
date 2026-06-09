@@ -1,18 +1,15 @@
 @model IReadOnlyList<(string Label, string? Href, string? DeleteFormId, bool IsDanger)>
-<div class="relative" x-data="{ open: false }">
-    <button type="button" @@click="open = !open" class="erp-btn-ghost h-8 w-8 p-0">⋯</button>
-    <div x-show="open" @@click.outside="open = false" x-cloak class="absolute right-0 z-10 mt-1 w-36 rounded-md border border-border bg-white py-1 shadow-lg">
-        @foreach (var action in Model)
+<div class="erp-row-actions">
+    @foreach (var action in Model)
+    {
+        var actionClass = action.IsDanger ? "erp-row-action erp-row-action-danger" : "erp-row-action";
+        if (!string.IsNullOrEmpty(action.Href))
         {
-            if (!string.IsNullOrEmpty(action.Href))
-            {
-                <a href="@action.Href" class="block px-3 py-1.5 text-sm hover:bg-accent @(action.IsDanger ? "text-red-600" : "")">@action.Label</a>
-            }
-            else if (!string.IsNullOrEmpty(action.DeleteFormId))
-            {
-                <button type="button" class="block w-full px-3 py-1.5 text-left text-sm text-red-600 hover:bg-accent"
-                        @@click="$dispatch('confirm-delete', '@action.DeleteFormId'); open = false">@action.Label</button>
-            }
+            <a href="@action.Href" class="@actionClass">@action.Label</a>
         }
-    </div>
+        else if (!string.IsNullOrEmpty(action.DeleteFormId))
+        {
+            <button type="button" class="@actionClass" @@click="$dispatch('confirm-delete', '@action.DeleteFormId')">@action.Label</button>
+        }
+    }
 </div>

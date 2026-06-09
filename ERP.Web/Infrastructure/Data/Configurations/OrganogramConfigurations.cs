@@ -33,6 +33,9 @@ public class OrganogramConfigurations :
     public void Configure(EntityTypeBuilder<LeaveBalance> builder)
     {
         builder.HasIndex(l => new { l.CompanyId, l.EmployeeId, l.LeaveTypeId, l.Year }).IsUnique();
+        builder.Property(l => l.OpeningBalance).HasPrecision(18, 2);
+        builder.Property(l => l.EarnedDays).HasPrecision(18, 2);
+        builder.Property(l => l.AdjustedDays).HasPrecision(18, 2);
         builder.HasOne(l => l.Employee).WithMany(e => e.LeaveBalances).HasForeignKey(l => l.EmployeeId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(l => l.LeaveType).WithMany().HasForeignKey(l => l.LeaveTypeId).OnDelete(DeleteBehavior.Restrict);
     }

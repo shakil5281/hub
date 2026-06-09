@@ -36,11 +36,16 @@ public class PayrollDetailConfiguration : IEntityTypeConfiguration<PayrollDetail
         builder.Property(p => p.OvertimeAmount).HasPrecision(18, 2);
         builder.Property(p => p.NightBillAmount).HasPrecision(18, 2);
         builder.Property(p => p.HolidayBillAmount).HasPrecision(18, 2);
+        builder.Property(p => p.WeeklyOffBillAmount).HasPrecision(18, 2);
+        builder.Property(p => p.AttendanceBonusAmount).HasPrecision(18, 2);
         builder.Property(p => p.AdvanceDeduction).HasPrecision(18, 2);
+        builder.Property(p => p.LoanDeduction).HasPrecision(18, 2);
         builder.Property(p => p.IncrementAdjustment).HasPrecision(18, 2);
         builder.Property(p => p.NetPayableSalary).HasPrecision(18, 2);
         builder.HasOne(p => p.PayrollSheet).WithMany(s => s.PayrollDetails).HasForeignKey(p => p.PayrollSheetId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(p => p.Employee).WithMany(e => e.PayrollDetails).HasForeignKey(p => p.EmployeeId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(p => p.SalaryStructure).WithMany(s => s.PayrollDetails).HasForeignKey(p => p.SalaryStructureId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(p => p.MonthlyAttendanceSummary).WithMany(s => s.PayrollDetails).HasForeignKey(p => p.MonthlyAttendanceSummaryId).OnDelete(DeleteBehavior.Restrict);
     }
 }
 
@@ -48,7 +53,9 @@ public class LeaveTypeConfiguration : IEntityTypeConfiguration<LeaveType>
 {
     public void Configure(EntityTypeBuilder<LeaveType> builder)
     {
+        builder.Property(l => l.LeaveCode).HasMaxLength(40);
         builder.HasOne(l => l.Company).WithMany().HasForeignKey(l => l.CompanyId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(l => new { l.CompanyId, l.LeaveCode }).IsUnique().HasFilter("[LeaveCode] IS NOT NULL");
     }
 }
 
@@ -65,7 +72,9 @@ public class ShiftConfiguration : IEntityTypeConfiguration<Shift>
 {
     public void Configure(EntityTypeBuilder<Shift> builder)
     {
+        builder.Property(s => s.ShiftCode).HasMaxLength(40);
         builder.HasOne(s => s.Company).WithMany().HasForeignKey(s => s.CompanyId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(s => new { s.CompanyId, s.ShiftCode }).IsUnique().HasFilter("[ShiftCode] IS NOT NULL");
     }
 }
 
@@ -82,6 +91,11 @@ public class PunchRecordConfiguration : IEntityTypeConfiguration<PunchRecord>
 {
     public void Configure(EntityTypeBuilder<PunchRecord> builder)
     {
+        builder.Property(p => p.PunchCardNo).HasMaxLength(80);
+        builder.Property(p => p.DeviceName).HasMaxLength(150);
+        builder.Property(p => p.RawPayload).HasColumnType("nvarchar(max)");
         builder.HasOne(p => p.Employee).WithMany(e => e.PunchRecords).HasForeignKey(p => p.EmployeeId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(p => p.DeviceMaster).WithMany(d => d.PunchRecords).HasForeignKey(p => p.DeviceMasterId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(p => p.EmployeeDeviceMapping).WithMany(d => d.PunchRecords).HasForeignKey(p => p.EmployeeDeviceMappingId).OnDelete(DeleteBehavior.Restrict);
     }
 }

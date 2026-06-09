@@ -12,15 +12,24 @@ window.erpInitDataTable = function (selector, options) {
         responsive: true,
         order: [],
         searching: false,
-        dom: 'rt<"erp-dt-footer flex flex-wrap items-center justify-between gap-4 px-4 py-3 border-t border-border"<"erp-dt-footer-left flex flex-wrap items-center gap-4"li><"erp-dt-footer-right"p>>',
+        dom: 'rt<"erp-dt-footer"<"erp-dt-footer-left"li><"erp-dt-footer-right"p>>',
         language: {
             lengthMenu: 'Rows per page _MENU_',
             info: '_START_–_END_ of _TOTAL_ row(s)',
             infoEmpty: '0 row(s)',
-            paginate: { first: '«', last: '»', next: '›', previous: '‹' }
+            paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
         }
     };
-    return new DataTable(selector, Object.assign(defaults, options || {}));
+    const config = Object.assign({}, defaults, options || {});
+    const actionHeaderIndex = Array.from(node.querySelectorAll('thead th'))
+        .findIndex(th => th.textContent.trim().toLowerCase() === 'actions');
+    if (actionHeaderIndex >= 0) {
+        config.columnDefs = [
+            ...(config.columnDefs || []),
+            { orderable: false, targets: [actionHeaderIndex] }
+        ];
+    }
+    return new DataTable(selector, config);
 };
 
 window.erpSaveFilterPreset = async function (module, name, formEl) {
